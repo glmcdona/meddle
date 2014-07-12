@@ -1,0 +1,5 @@
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\bin\x64\Debug\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\bin\x64\Debug\NativeDebugWrappers.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\bin\x64\Debug\NativeDebugWrappers.XML
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\obj\x64\Debug\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\obj\x64\Debug\NativeDebugWrappers.pdb

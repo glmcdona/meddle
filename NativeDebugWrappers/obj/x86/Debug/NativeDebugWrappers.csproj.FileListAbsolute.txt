@@ -1,0 +1,6 @@
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\bin\x86\Debug\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\bin\x86\Debug\NativeDebugWrappers.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\bin\x86\Debug\NativeDebugWrappers.XML
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\obj\x86\Debug\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\obj\x86\Debug\NativeDebugWrappers.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\obj\x86\Debug\NativeDebugWrappers.csprojResolveAssemblyReference.cache

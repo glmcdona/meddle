@@ -1,0 +1,754 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NativeDebugWrappers</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Samples.Debugging.Native.NativeDbgModule">
+            <summary>
+            Represents a module in the debuggee. This specifically contains the name (if available), the base address, and the File handle to close.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgModule.CloseHandle">
+            <summary>
+            Close the handle associated with this module.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativeDbgModule.Size">
+            <summary>
+            Size of module in memory. Addresses between BaseAddress and (BaseAddress + Size) belong to this module.
+            0 on error.
+            </summary>
+            <remarks> Not valid until after the load-dll event is continued.</remarks>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.NativeDbgProcess">
+            <summary>
+            Local Native Process being debugged
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.IMemoryReader">
+            <summary>
+            Interface to provide access to target
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.IMemoryReader.ReadMemory(System.IntPtr,System.Byte[])">
+            <summary>
+            Read memory from the target process. Either reads all memory or throws.
+            </summary>
+            <param name="address">target address to read memory from</param>
+            <param name="buffer">buffer to fill with memory</param>
+            <exception cref="T:Microsoft.Samples.Debugging.Native.ReadMemoryFailureException">Throws if can't read all the memory</exception>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.Finalize">
+            <summary>
+            Finalizer for NativeDbgProcess
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.Dispose">
+            <summary>
+            Implementation of IDisposable.Dispose 
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.Dispose(System.Boolean)">
+            <summary>
+            Dispose worker
+            </summary>
+            <param name="disposing">true if releasing managed resources</param>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.TerminateProcess(System.Int32)">
+            <summary>
+            Post a request for the process terminate.
+            </summary>
+            <param name="exitCode">exit code to supply</param>
+            <remarks>
+            Terminate only posts a request to terminate. It makes no gaurantees when the process actually
+            terminates (or even that the termination actually succeed)
+            The debugger must still pump debug events even after Terminate is called.
+            Additional debug events may still be sent. This commonly includes Exit Thread events and
+            eventually an ExitProcess event.
+            It may include other events too. For example, on WinXp, if Terminate
+            is called at the CreateProcess event, the load dll event for ntdll is still dispatched.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.Break">
+            <summary>
+            Break into the debuggee.
+            </summary>
+            <remarks>This causes the debuggee to fire a debug event which the debugger will
+            then pickup via WaitForDebugEvent.</remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.IsExited">
+            <summary>
+            Determine if the process has really exited, by checking the process handle.
+            </summary>
+            <returns>true if process handle is signaled, else false</returns>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.InitHandle(System.IntPtr)">
+            <summary>
+            Initialize handle to this process. This can be set during a CreateProcess debug event.
+            This object then gets ownership and must close it.
+            </summary>
+            <param name="handle">handle to process</param>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.ClearHandle">
+            <summary>
+            Called when handling ExitProcess debug event. This does not CloseHandle()
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.ReadMemory(System.IntPtr,System.Byte[])">
+            <summary>
+            Implement IMemoryReader.ReadMemory
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.HandleIfLoaderBreakpoint(Microsoft.Samples.Debugging.Native.NativeEvent)">
+            <summary>
+            Check if the event is the Loader Breakpoint, and if so, deal with it.
+            </summary>
+            <param name="nativeEvent">event</param>
+            <remarks>Loader breakpoint is generally the first breakpoint event</remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.LookupModule(System.IntPtr)">
+            <summary>
+            Lookup a module by base address
+            </summary>
+            <param name="baseAddress">base address for module to look for</param>
+            <returns>module with matching base address. Returns null on invalid address</returns>
+            <remarks>
+            Some WOW64 cases will produce unload events for which there are no matching load events.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.FindModuleForAddress(System.IntPtr)">
+            <summary>
+            Find a module containing the address
+            </summary>
+            <param name="address">any address in the process</param>
+            <returns>NativeModule containing the address, or null if not in the native module list.</returns>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.GetThreadContext(System.Int32)">
+            <summary>
+            Retrieves the Thread Context of the thread that the event occured on.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeDbgProcess.GetThreadContext(System.Int32,Microsoft.Samples.Debugging.Native.INativeContext)">
+            <summary>
+            copy the current context into the existing context buffer. Useful to avoid allocating a new context.
+            </summary>
+            <param name="threadId">thread ID in the current process</param>
+            <param name="context">already allocated context buffer</param>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativeDbgProcess.Id">
+            <summary>
+            OS Process ID (pid)
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativeDbgProcess.UnsafeHandle">
+            <summary>
+            Expose the raw handle. This is a dangerous this to do.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativeDbgProcess.IsInitialized">
+            <summary>
+            Returns true if the loader breakpoint has been dispatched
+            Else returns false.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.NativeEvent">
+             <summary>
+             Base class for native debug events
+             </summary>
+             <remarks>
+             Base class for events.
+             A single process will generate a lot of debug events, so we want to keep them pretty lightweight.
+             At the OS level, an event is a DEBUG_EVENT structure, which is about 0x98 bytes
+             The managed overhead here is:
+             - a copy of the DEBUG_EVENT, fixed up for 32/64-bit alignment
+             - a backpointer to the NativePipeline object. 
+             - a MethodTable pointer (from being a managed object). We take advantage of this by having derived 
+                objects to expose debug event properties in a friendly way (especially properties requiring
+                non-trivial accessing, such as getting a message string out of the debuggee).
+             - m_ContinueStatus
+             This gives us a rich object model over the somewhat rough model native presents.
+            
+             Resouce management:
+             - the event's ctor describes what can ve done when we first get the event
+             - the event's DoCleanupForContinue() method describes what has to be done when the event is continued.
+             Events keep a backpointer to the pipeline, which remembers the overall state. This is important because some
+             state is introduced via an Enter event (eg, LoadDll) and must be remembered and cleaned up in the corresponding
+             exit event (UnloadDll)
+             </remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeEvent.DoCleanupForContinue">
+             <summary>
+             Do any event cleanup that has to be done when the event is continued
+             This should be called by the pipeline when the event is continued.
+             </summary>
+             <remarks>According to:
+             http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/waitfordebugevent.asp
+             When we continue, we should:
+             - for a LOAD_DLL_DEBUG_EVENT, call CloseHandle on u.LoadDll.hFile member of the DEBUG_EVENT structure.
+             - for CREATE_PROCESS_DEBUG_EVENT, CloseHandle on u.CreateProcess.hFile
+             - for OUTPUT_DEBUG_STRING_EVENT, Clear the exception (gh)       
+            
+             The OS will close the handles to the hProcess and hThread objects when calling ContinueDebugEvent.
+             </remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeEvent.GetCurrentContext">
+            <summary>
+            Retrieves the Thread Context of the thread that the event occured on.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeEvent.GetCurrentContext(Microsoft.Samples.Debugging.Native.INativeContext)">
+            <summary>
+            copy the current context into the existing context buffer. Useful to avoid allocating a new context.
+            </summary>
+            <param name="context">already allocated context buffer</param>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeEvent.WriteContext(Microsoft.Samples.Debugging.Native.INativeContext)">
+            <summary>
+            Writes back the Thread Context of the thread that the CreateThreadNativeEvent was generated on
+            </summary>
+            <remarks>Setting a thread's context is very dangerous operation and must be used properly.</remarks>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativeEvent.Pipeline">
+            <summary>
+            Get the NativePipeline that this event came from.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativeEvent.EventCode">
+            <summary>
+            Get the event code identifying the type of event.
+            </summary>
+            <remarks>This can also be obtained from the derived class.</remarks>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativeEvent.ThreadId">
+            <summary>
+            OS Thread ID of the thread that produced this debug event.
+            </summary>
+            <remarks>For new threads, this is the id of the new thread, and not
+            the id of the thread that called CreateThread.</remarks>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativeEvent.ProcessId">
+            <summary>
+            Process ID of the event 
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativeEvent.Process">
+            <summary>
+            Process helper object for this event. 
+            </summary>
+            <exception>Throws if process is no longer available</exception>
+            <remarks>A process is removed from the pipeline after continuing from the exit process event or
+            after calling Detach </remarks>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.CreateProcessDebugEvent">
+            <summary>
+            Derived class for the CREATE_PROCESS_DEBUG_EVENT debug event.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.ExitProcessDebugEvent">
+            <summary>
+            Derived class for EXIT_PROCESS_DEBUG_EVENT. 
+            </summary>
+            <remarks>
+            This matches the <see cref="T:Microsoft.Samples.Debugging.Native.CreateProcessDebugEvent"/> event. 
+            You can also wait on the process's object handle to tell if the process exited.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.OutputDebugStringNativeEvent">
+            <summary>
+            Debug event for OUTPUT_DEBUG_STRING_EVENT, representing a log message from kernel32!OutputDebugString
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.OutputDebugStringNativeEvent.ReadMessage">
+            <summary>
+            Cache and read the log message from the target.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.DllBaseNativeEvent">
+            <summary>
+            Base class for Dll load and unload events
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.DllBaseNativeEvent.Module">
+            <summary>
+            Get the native module associated with this event.        
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.DllBaseNativeEvent.BaseAddress">
+            <summary>
+            Get the base address of the module. This is a unique identifier.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.LoadDllNativeEvent">
+            <summary>
+            Debug event for LOAD_DLL_DEBUG_EVENT.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.LoadDllNativeEvent.ReadImageName">
+            <summary>
+            Get the name of the dll if available.
+            </summary>
+            <returns>full string name of dll if available</returns>
+            <remarks>This must read from the target. The value is cached. </remarks>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.LoadDllNativeEvent.BaseAddressWorker">
+            <summary>
+            Non-virtual accessor, so it's safe to use in the ctor. 
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.LoadDllNativeEvent.BaseAddress">
+            <summary>
+            Base address of the dll. This can be used to uniquely identify the dll within a process and match load and unload events.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.UnloadDllNativeEvent">
+            <summary>
+            Debug event for UNLOAD_DLL_DEBUG_EVENT.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.UnloadDllNativeEvent.BaseAddress">
+            <summary>
+            BaseAddress of module. Matches BaseAddress from the LoadDllNativeEvent. 
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.CreateThreadNativeEvent">
+            <summary>
+            Debug event for native thread create.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.ExitThreadNativeEvent">
+            <summary>
+            Debug event for native thread exit.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.ExitThreadNativeEvent.ExitCode">
+            <summary>
+            Get the exit code of the thread.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.ExceptionNativeEvent">
+            <summary>
+            Represent an exception debug event
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.ExceptionNativeEvent.ClearException">
+            <summary>
+            Clears the exception (continue as "gh"). This is an invasive operation that may change
+            the debuggee's behavior.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.ExceptionNativeEvent.ExceptionCode">
+            <summary>
+            Get the exception code identifying the type of exception.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.ExceptionNativeEvent.FirstChance">
+            <summary>
+            Is the exception first-chance or unhandled?
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.ExceptionNativeEvent.Address">
+            <summary>
+            The address of the exception.
+            For hardware exceptions, this is the address of the instruction that generated the fault.
+            For software exceptions, this is the address in the OS that raised the exception
+            (typically in kernel32!RaiseException)
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.ReadMemoryFailureException">
+            <summary>
+            Thrown when failing to read memory from a target.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.ReadMemoryFailureException.#ctor(System.IntPtr,System.Int32)">
+            <summary>
+            Initialize a new exception
+            </summary>
+            <param name="address">address where read failed</param>
+            <param name="countBytes">size of read attempted</param>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.ReadMemoryFailureException.#ctor">
+            <summary>
+            Initializes a new instance of the ReadMemoryFailureException.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.ReadMemoryFailureException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the ReadMemoryFailureException with the specified error message.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.ReadMemoryFailureException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the ReadMemoryFailureException with the specified error message and inner Exception.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="innerException">The exception that is the cause of the current exception.</param>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.ReadMemoryFailureException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the ReadMemoryFailureException class with serialized data.
+            </summary>
+            <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.NativeDebugEventCode">
+            <summary>
+            Native debug event Codes that are returned through NativeStop event
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.ExceptionCode">
+            <summary>
+            Common Exception codes
+            </summary>
+            <remarks>Users can define their own exception codes, so the code could be any value. 
+            The OS reserves bit 28 and may clear that for its own purposes</remarks>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.ExceptionRecordFlags">
+            <summary>
+            Flags for <see cref="T:Microsoft.Samples.Debugging.Native.EXCEPTION_RECORD"/>
+            </summary>
+        </member>
+        <member name="F:Microsoft.Samples.Debugging.Native.ExceptionRecordFlags.None">
+            <summary>
+            No flags. 
+            </summary>
+        </member>
+        <member name="F:Microsoft.Samples.Debugging.Native.ExceptionRecordFlags.EXCEPTION_NONCONTINUABLE">
+            <summary>
+            Exception can not be continued. Debugging services can still override this to continue the exception, but recommended to warn the user in this case.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.EXCEPTION_RECORD">
+            <summary>
+            Information about an exception
+            </summary>    
+            <remarks>This will default to the correct caller's platform</remarks>
+        </member>
+        <member name="F:Microsoft.Samples.Debugging.Native.EXCEPTION_RECORD.ExceptionAddress">
+            <summary>
+            Address in the debuggee that the exception occured at.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Samples.Debugging.Native.EXCEPTION_RECORD.NumberParameters">
+            <summary>
+            Number of parameters used in ExceptionInformation array.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.EXCEPTION_RECORD.IsNotContinuable">
+            <summary>
+            Based off ExceptionFlags, is the exception Non-continuable?
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.EXCEPTION_DEBUG_INFO">
+            <summary>
+            Information about an exception debug event.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.LOAD_DLL_DEBUG_INFO.ReadImageNameFromTarget(Microsoft.Samples.Debugging.Native.IMemoryReader)">
+            <summary>
+            Read the image name from the target.
+            </summary>
+            <param name="reader">access to target's memory</param>
+            <returns>String for full path to image. Null if name not available</returns>
+            <remarks>MSDN says this will never be provided for during Attach scenarios; nor for the first 1 or 2 dlls.</remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.OUTPUT_DEBUG_STRING_INFO.ReadMessageFromTarget(Microsoft.Samples.Debugging.Native.IMemoryReader)">
+            <summary>
+            Read the log message from the target. 
+            </summary>
+            <param name="reader">interface to access debuggee memory</param>
+            <returns>string containing message or null if not available</returns>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.DebugEvent32">
+            <summary>
+            Matches DEBUG_EVENT layout on 32-bit architecture
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.DebugEvent64">
+            <summary>
+            Matches DEBUG_EVENT layout on 64-bit architecture
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.NativeMethods.ContinueStatus">
+            <summary>
+            Values to pass to ContinueDebugEvent for ContinueStatus
+            </summary>
+        </member>
+        <member name="F:Microsoft.Samples.Debugging.Native.NativeMethods.ContinueStatus.CONTINUED">
+            <summary>
+            This is our own "empty" value
+            </summary>
+        </member>
+        <member name="F:Microsoft.Samples.Debugging.Native.NativeMethods.ContinueStatus.DBG_CONTINUE">
+            <summary>
+            Debugger consumes exceptions. Debuggee will never see the exception. Like "gh" in Windbg.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Samples.Debugging.Native.NativeMethods.ContinueStatus.DBG_EXCEPTION_NOT_HANDLED">
+            <summary>
+            Debugger does not interfere with exception processing, this passes the exception onto the debuggee.
+            Like "gn" in Windbg.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.NativeContextAllocator">
+            <summary>
+            Serves as global hook to register a platform-specific allocator for a Context. 
+            This provides extensions an easy way to get a CONTEXT for the current platform.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeContextAllocator.Allocate">
+            <summary>
+            Allocate a context for the current platform
+            </summary>
+            <returns>Newly allocated platform specific context, determined by SetDefaultAllocator</returns>
+            <exception cref="T:System.InvalidOperationException">Throws if no default allocator is set </exception>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativeContextAllocator.SetDefaultAllocator(Microsoft.Samples.Debugging.Native.NativeContextAllocator.AllocatorFunction)">
+            <summary>
+            Set the allocator used by Alloc
+            </summary>
+            <param name="fp">delegate to function that will allocate the context</param>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.NativeContextAllocator.AllocatorFunction">
+            <summary>
+            Prototype for native context allocator function.
+            </summary>
+            <returns>new instance of a native context</returns>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.IContextDirectAccessor">
+            <summary>
+            Exposes raw contents of the Context in IContext. This locks the buffer. Dispose this object to unlock the buffer
+            </summary>
+            <remarks>The implementation behind the interface has a variety of ways to ensure the memory is safe to write to.
+            The buffer may be in the native heap; or it may be to a pinned object in the managed heap
+            This is primarily intended for writing to the context (by passing the buffer out to a pinvoke),
+            but can also be a way to read the raw bytes.</remarks>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.IContextDirectAccessor.Size">
+            <summary>
+            The size of the buffer. This should be the same as INativeContext.Size.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.IContextDirectAccessor.RawBuffer">
+            <summary>
+            A pointer to the raw buffer. The memory is pinned until this object is disposed. Check the context Flags 
+            to know which raw bytes are valid to be read. 
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.INativeContext">
+            <summary>
+            Interface to a context. This provides platform agnostic wrapper to a platform specific OS Context.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.INativeContext.OpenForDirectAccess">
+            <summary>
+            Used to lock the buffer and get a raw pointer to it. 
+            This is the only way to change the entire context at once. 
+            This is useful for pinvoking to native functions.
+            </summary>
+            <returns>context writer object</returns>
+            <remarks>
+            Expected usage would be (in C# syntax):
+            <example>
+               IContext c = NativeContextAllocator.Alloc();
+               using(IContextWriter w = c.OpenForDirectAccess) { // context buffer is now locked
+                  SomeNativeFunctionToGetThreadContext(w.RawBuffer, w.Size);
+               } // w is disposed, this unlocks the context buffer.
+            </example>
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.INativeContext.SetSingleStepFlag(System.Boolean)">
+            <summary>
+            Enable or disable the single-step flag in the context. 
+            </summary>
+            <param name="enable">true to enable single-stepping, false to disable it</param>
+            <exception cref="T:System.InvalidOperationException">Throws if the architecture doesn't support single-stepping.</exception>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.INativeContext.Clone">
+            <summary>
+            Create a new deep copy of this context. 
+            The copies are independent and can be modified without interfering with each other.
+            </summary>
+            <returns>copy of this context</returns>
+            <remarks>Contexts can be large, so copying excessively would be expensive.</remarks>
+            <example> 
+            INativeContext c1 = ...
+            INativeContext c2 = c1.Clone();
+              
+            Assert(c1 != c2); // true, Clone gives different instances
+            Assert(c1.Equals(c2)); // true
+            Assert(c2.Equals(c1)); // true
+            </example>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.INativeContext.EnumerateRegisters">
+            <summary>
+            Enumerate registers names (and their types) for late-bound access. Available registers depend on the flags.
+            </summary>
+            <returns>an enumeration of (name,type) pairs</returns>
+            <remarks>An implementation does not need to include all registers on the context.
+            The returned strings can be used with other by-name functions like <see cref="M:Microsoft.Samples.Debugging.Native.INativeContext.FindRegisterByName(System.String)"/>
+            and <see cref="M:Microsoft.Samples.Debugging.Native.INativeContext.SetRegisterByName(System.String,System.Object)"/>.</remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.INativeContext.FindRegisterByName(System.String)">
+            <summary>
+            Get a register by name
+            </summary>
+            <param name="name">Name of the registers. Lookup is case insensitive</param>
+            <returns>value of register. Registers can be arbitrary types (uint32, double, long, etc), so this
+            returns an object. Throws if name is not currently valid</returns>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.INativeContext.SetRegisterByName(System.String,System.Object)">
+            <summary>
+            Sets a register by name.
+            </summary>
+            <param name="name">Case-insensitive name of register to set. </param>
+            <param name="value">value of register to set. Type of value must be convertable to type of the register</param>
+            <exception cref="T:System.InvalidOperationException">Throws if no matching name or if register is not valid for the given Flags.</exception>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.INativeContext.Size">
+            <summary>
+            Get Size in bytes. Size could change depending on the flags.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.INativeContext.Flags">
+            <summary>
+            Get the flags associated with the context. 
+            </summary>
+            <remarks>Flags are platform specific and generally indicate which parts of the context are valid.
+            Flags will affect which registers are available (EnumerateRegisters), potentially the Size of the context,
+            and how contexts are compared.
+            Expanding the active flags means newly included registers have an uninitialized value.
+            A context could be completely constructed late-bound by setting the Flags and then calling
+            SetRegisterByName on each regsister
+            
+            This property must roundtrip.
+            
+            When setting the flags to a new value, the object may enforce certain contstraints(for example,
+            it may ensure that certain mandatory flags stay present). To see if a the set occured exactly,
+            reget the flags after setting them and compare with expected results.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.INativeContext.InstructionPointer">
+            <summary>
+            Get the instruction pointer (eip on x86)
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.INativeContext.StackPointer">
+            <summary>
+            Get the stack pointer (esp on x86)
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.INativeContext.IsSingleStepFlagEnabled">
+            <summary>
+            Is the single step flag enabled?
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.INativeContext.Cpu">
+            <summary>
+            Get a simple string description of the CPU the context is for. A implementation may also provide a ToString()
+            override to give more detail (eg, which flags are active)
+            </summary>
+        </member>
+        <member name="T:Microsoft.Samples.Debugging.Native.NativePipeline">
+            <summary>
+            This encapsulates a set of processes being debugged with the native debugging pipeline,
+            and the wait primitives to get native debug events from these processes.
+            </summary>
+            <remarks>
+            This is single-threaded. The underlying OS APIs must all be called on the same thread.
+            Multiple instances can exist on different threads.
+            Only one pipeline object should exist on a given thread.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativePipeline.GetProcess(System.Int32)">
+            <summary>
+            Get the process object for the given pid.
+            </summary>
+            <param name="processId">OS process id of process</param>
+            <returns></returns>
+            <exception>Throws if process is no longer deing debugger. This is the 
+            case if you detached the process or after the ExitProcess debug event has been continued</exception>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativePipeline.Attach(System.Int32)">
+            <summary>
+            Attach to the given process. Throws on error. 
+            </summary>
+            <param name="processId">process ID of target process to attach to</param>
+            <returns>process object representing process being debugged</returns>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativePipeline.CreateProcessChildDebug(System.String,System.String)">
+            <summary>
+            Create a process under the debugger, and include debugging any
+            child processes
+            </summary>
+            <param name="application"></param>
+            <param name="commandArgs"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativePipeline.CreateProcessDebug(System.String,System.String)">
+            <summary>
+            Creates a new process under this debugging pipeline.
+            </summary>
+            <param name="application">application to launch</param>
+            <param name="commandArgs">arguments (not including the applicatin name) to pass to the debugee.</param>
+            <returns>NativeDbgProcess instance for newly created process</returns>
+            <seealso cref="M:Microsoft.Samples.Debugging.Native.NativePipeline.Attach(System.Int32)"/>
+            <remarks>Pump the process for debug events by calling WaitForDebugEvent.
+            Create a process under the debugger
+            comandArgs are the arguments to application. Does not need to include arg[0] (the application name).</remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativePipeline.Detach(Microsoft.Samples.Debugging.Native.NativeDbgProcess)">
+            <summary>
+            Stop debugging the specified process (detach)
+            </summary>
+            <param name="process">process to detach from</param>
+            <remarks>After detaching, the process is removed from the caches and can not be accessed. If detaching at a debug
+            event, do not call Continue on the event. </remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativePipeline.WaitForDebugEvent(System.Int32)">
+            <summary>
+            Waits for a debug event from any of the processes in the wait set.
+            </summary>
+            <param name="timeout">timeout in milliseconds to wait. If 0, checks for a debug event and returns immediately</param>
+            <returns>Null if no event is available</returns>
+            <remarks>Debug events should be continued by calling ContinueEvent. The debuggee is completely stopped when a
+            debug event is dispatched and until it is continued.</remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativePipeline.WaitForDebugEventInfinite">
+            <summary>
+            Wait forever for a debug event from a process. 
+            </summary>
+            <returns>event</returns>
+            <exception cref="T:System.InvalidOperationException">throws on failure. Since this waits forever, not having a debug event means we must have hit some error </exception>
+            <seealso cref="M:Microsoft.Samples.Debugging.Native.NativePipeline.WaitForDebugEvent(System.Int32)"/>
+            <remarks>
+            All pipeline functions must be called on the same thread.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativePipeline.ContinueEvent(Microsoft.Samples.Debugging.Native.NativeEvent)">
+            <summary>
+            Continue a debug event previously gotten by WaitForDebugEvent
+            </summary>
+            <param name="nativeEvent"></param>
+            <remarks>Can't continue a debug event if we just detached from the process</remarks>
+        </member>
+        <member name="M:Microsoft.Samples.Debugging.Native.NativePipeline.Dispose">
+            <summary>
+            Dispose unmanaged resources, which would include process handles. 
+            </summary>
+        </member>
+        <member name="P:Microsoft.Samples.Debugging.Native.NativePipeline.KillOnExit">
+            <summary>
+            Do outstanding debuggees get automatically deleted when the debugger exits?
+            </summary>
+            <remarks>
+            Default is 'True'. Only available in WinXp/Win2k03 and beyond.
+            This corresponds to kernel32!DebugSetProcessKillOnExit()
+            If somebody calls DebugSetProcessKillOnExit directly on this thread, then the values
+            will be incorrect.
+            </remarks>
+        </member>
+    </members>
+</doc>

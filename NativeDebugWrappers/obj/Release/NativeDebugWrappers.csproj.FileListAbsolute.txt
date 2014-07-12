@@ -1,0 +1,9 @@
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\bin\Release\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\bin\Release\NativeDebugWrappers.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\obj\Release\NativeDebugWrappers.csprojResolveAssemblyReference.cache
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\obj\Release\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\mdgb\src\debugger\NativeDebugWrappers\obj\Release\NativeDebugWrappers.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\bin\Release\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\bin\Release\NativeDebugWrappers.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\obj\Release\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\obj\Release\NativeDebugWrappers.pdb

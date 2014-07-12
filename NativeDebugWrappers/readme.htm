@@ -1,0 +1,232 @@
+<html>
+
+<head>
+<title>CLR Managed Debugger</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";}
+h2
+	{margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	line-height:24.0pt;
+	font-size:22.0pt;
+	font-family:Verdana;
+	color:gray;
+	font-weight:bold;}
+h4
+	{margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	line-height:20.0pt;
+	font-size:18.0pt;
+	font-family:Verdana;
+	font-weight:bold;}
+h5
+	{margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	line-height:16.0pt;
+	font-size:14.0pt;
+	font-family:Verdana;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:blue;
+	text-decoration:underline;}
+p.MsoPlainText, li.MsoPlainText, div.MsoPlainText
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:"Courier New";}
+p
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:"Courier New";}
+pre
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:"Courier New";}
+p.text, li.text, div.text
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	line-height:12.0pt;
+	font-size:10.0pt;
+	font-family:Verdana;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+<meta http-equiv=Content-Language content=en-us>
+</head>
+
+<body lang=EN-US link=blue vlink=blue>
+
+<div class=Section1>
+
+<h2>CLR Managed Debugger (mdbg) Sample 2.0</h2>
+
+<p class=text>&nbsp;</p>
+
+<h4>Sample Overview</h4>
+
+<p class=MsoPlainText>This sample provides the source files for CLR command
+line debugger, <b>mdbg</b>.&nbsp; These sources demonstrate how to use the CLR
+Debugging interfaces.&nbsp; As a corollary, they also show usage of the CLR
+MetaData, Symbol Store, and Process Publishing interfaces. </p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<p class=MsoPlainText>The sample also demonstrates use of advanced debugger
+features implemented in Whidbey:</p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><a
+href="demo/EditAndContinue/enc.htm">Edit and Continue</a></p>
+
+<p class=MsoPlainText>&nbsp;&nbsp;&nbsp;</p>
+
+<p class=MsoPlainText>In addition to this, a managed pdb to XML conversion tool
+has also been included:</p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><a
+href="demo/pdb2xml/pdb2xml_demo.htm">Pdb2Xml</a></p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<p class=MsoPlainText>This debugger is also accompanied by four extensions that
+enhance its functionality: <br>
+(Once built, simply type &quot;load &lt;file&gt;&quot; to load the desired
+extension.)</p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><a
+href="demo/IronPythonExtension/IronPython-Extension.htm">IronPython extension</a>
+that adds Python's scripting engine to mdbg (pythonExt)</p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Winforms
+Graphical User Interface extension for easier debugging (gui)</p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Edit
+&amp; Continue extension for modification of debugged programs (enc)</p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>IL
+disassembler extension for display of IL code being executed (ildasm)</p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<h4>Building the Sample</h4>
+
+<p class=MsoPlainText style='text-align:justify'>To build the <b>mdbg</b>
+sample you will need to have a .NET SDK version 2.0 installed on your
+system.&nbsp; If you have Visual Studio 2005, you already have this.&nbsp; The
+sample must be built using the Visual Studio 2005 solution file.</p>
+
+<p class=MsoPlainText style='text-align:justify'>&nbsp;</p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-align:justify'><span
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Open
+the mdbg.sln file.</p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Symbol'>·</span><span
+style='font-size:7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>From the &quot;Build&quot; menu, select &quot;Build Solution&quot; </p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Symbol'>·</span><span
+style='font-size:7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>The solution file uses &quot;Debug&quot; as the default, but you can
+simply select &quot;Release&quot; from the dropdown menu at the top if you want
+that instead. </p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<p class=MsoPlainText><b><u>NOTE</u></b>: The IronPython extension project is
+not built by default. More details here - <a
+href="src/extensions/pythonExt/readme.txt">IronPython Extension</a>.</p>
+
+<h5>&nbsp;</h5>
+
+<h4>Running the Sample</h4>
+
+<p class=MsoPlainText>Run <b>mdbg.exe</b> from the bin directory, or by
+pressing F5 in Visual Studio.&nbsp; Mdbg commands are similar to cordbg commands.
+Please refer to the cordbg manual, mdbg's help command, or the source code for
+more information on how to use various debugger commands.</p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<p class=MsoPlainText>Be sure to try the Graphical User Interface extension
+which makes debugging managed programs easier and more natural.&nbsp; To load
+this extension simply type &quot;load gui&quot; on the mdbg command line.</p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<p class=MsoPlainText>This sample also contains API-level documentation for two
+libraries, mdbgeng.dll and mdbgext.dll.&nbsp; Documentation for these libraries
+can be found in the DOC subdirectory.</p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<h4>Feedback on the Sample</h4>
+
+<p class=MsoPlainText>This sample is presented courtesy of the CLR Debugger
+Team. It is intended for use as a demonstration on writing .NET managed
+debuggers in managed code. If you have any questions about the sample or the
+managed debugging APIs, or if you would like to send us a suggestion about the
+sample, please participate in our <a
+href="http://forums.microsoft.com/MSDN/ShowForum.aspx?ForumID=868&amp;SiteID=1">discussion
+forum</a>.</p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<p class=MsoPlainText><b><span style='font-size:18.0pt;font-family:Verdana'>&nbsp;</span></b></p>
+
+<p class=MsoPlainText><b><span style='font-size:18.0pt;font-family:Verdana'>Links</span></b></p>
+
+<pre>&nbsp;</pre><pre><a
+href="http://www.microsoft.com/downloads/details.aspx?familyid=0856EACB-4362-4B0D-8EDD-AAB15C5E04F5">.NET framework 2.0 Redist (x86)</a><b>:</b> The Microsoft .NET framework 2.0 redistributable package installs the .NET framework</pre><pre>runtime and associated files required to run applications developed to target framework 2.0. </pre><pre><b>&nbsp;</b></pre><pre><a
+href="http://www.microsoft.com/downloads/details.aspx?familyid=FE6F2099-B7B4-4F47-A244-C96D69C35DEC">.NET framework 2.0 SDK (x86)</a><b>:</b> The Microsoft .NET framework 2.0 SDK includes tools, documentation and samples that </pre><pre>developers need to write, build, test and deploy .NET framework applications. </pre><pre>&nbsp;</pre><pre><a
+href="http://msdn.microsoft.com/vstudio/express/visualcsharp/download/">Visual C# express</a><b>:</b> IDE for building applications that target .NET framework 2.0.</pre>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+</div>
+
+</body>
+
+</html>

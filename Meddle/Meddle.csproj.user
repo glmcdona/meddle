@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <StartArguments>controller.py</StartArguments>
+    <StartWorkingDirectory>C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\examples\pymeddle_mstsc\</StartWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <StartWorkingDirectory>C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\examples\pymeddle_mstsc\</StartWorkingDirectory>
+    <StartArguments>controller.py</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <StartWorkingDirectory>C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\scripts\pymeddle_deviceiocontrol\</StartWorkingDirectory>
+    <StartArguments>controller.py</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <StartWorkingDirectory>C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\examples\pymeddle_mstsc</StartWorkingDirectory>
+    <StartArguments>controller.py</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PublishUrlHistory />
+    <InstallUrlHistory />
+    <SupportUrlHistory />
+    <UpdateUrlHistory />
+    <BootstrapperUrlHistory />
+    <ErrorReportUrlHistory />
+    <FallbackCulture>en-US</FallbackCulture>
+    <VerifyUploadedFiles>false</VerifyUploadedFiles>
+  </PropertyGroup>
+</Project>

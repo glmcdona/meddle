@@ -1,0 +1,4 @@
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\bin\x86\Release\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\bin\x86\Release\NativeDebugWrappers.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\obj\x86\Release\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\obj\x86\Release\NativeDebugWrappers.pdb

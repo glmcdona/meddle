@@ -1,0 +1,15 @@
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\Meddle.exe.config
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\Meddle.exe
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\Meddle.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\IronPython.SQLite.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\IronPython.Wpf.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\Microsoft.Scripting.AspNet.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\NativeDebugWrappers.dll
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\NativeDebugWrappers.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\NativeDebugWrappers.xml
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\IronPython.SQLite.xml
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\IronPython.Wpf.xml
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\bin\Debug\Microsoft.Scripting.AspNet.xml
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\obj\Debug\Meddle.csprojResolveAssemblyReference.cache
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\obj\Debug\Meddle.exe
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\Meddle\obj\Debug\Meddle.pdb
