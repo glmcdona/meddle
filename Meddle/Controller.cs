@@ -67,14 +67,17 @@ namespace Meddle
         }
 
 
-        public Controller(string startScript, string scriptPath)
+        public Controller(string startScript)
         {
-            _scriptPath = scriptPath;
+            _scriptPath = System.IO.Path.GetFullPath(startScript);
 
             // Now that we slightly verified the xml structure, lets initialize
-            _pyBoss = new PythonBoss(scriptPath);
+            _pyBoss = new PythonBoss(_scriptPath);
+            string filename = System.IO.Path.GetFileName(startScript);
+            if( filename.EndsWith(".py") )
+                filename = filename.Substring(0,filename.Length - 3);
 
-            if (!_pyBoss.AddCode("from " + startScript.Replace(".py", "") + " import *", startScript))
+            if (!_pyBoss.AddCode(String.Format(@"from {0} import *", filename) , startScript))
                 return;
 
             try

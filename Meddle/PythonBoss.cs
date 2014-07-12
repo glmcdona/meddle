@@ -40,8 +40,9 @@ namespace Meddle
       ICollection<string> paths = PyEngine.GetSearchPaths();
       if (String.IsNullOrEmpty(dir))
         dir = Environment.CurrentDirectory;
-      paths.Add("C:\\Program Files (x86)\\IronPython 2.7\\Lib");
       paths.Add(dir);
+      paths.Add(AppDomain.CurrentDomain.BaseDirectory);
+      paths.Add(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"Lib"));
       PyEngine.SetSearchPaths(paths);
 
       _logger.AddInfo("Python Initialized");

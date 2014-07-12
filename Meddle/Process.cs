@@ -589,9 +589,9 @@ namespace Meddle
                     }
                 }
             }
-            catch
+            catch(Exception e)
             {
-                throw new Exception("Unknown failure in Engine.GetLibraryHeader().");
+                throw new Exception("Unknown failure in Engine.GetLibraryHeader():\n" + e.ToString());
             }
 
             Console.WriteLine(string.Format("ERROR: Failed to call 'Engine.GetLibraryHeader()'."));

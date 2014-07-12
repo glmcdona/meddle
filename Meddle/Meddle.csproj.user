@@ -5,8 +5,9 @@
     <StartWorkingDirectory>C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\examples\pymeddle_mstsc\</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <StartWorkingDirectory>C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\examples\pymeddle_mstsc\</StartWorkingDirectory>
-    <StartArguments>controller.py</StartArguments>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
+    <StartArguments>.\..\..\..\examples\example_mstsc\controller.py</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <StartWorkingDirectory>C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\scripts\pymeddle_deviceiocontrol\</StartWorkingDirectory>

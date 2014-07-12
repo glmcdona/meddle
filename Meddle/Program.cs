@@ -50,7 +50,7 @@ namespace Meddle
       if (config != "" && System.IO.File.Exists(config))
       {
         // Create a process instance using the input config
-        Controller controller = new Controller(config, "C:\\Users\\glmcdona\\Documents\\Visual Studio 2008\\Projects\\Meddle_Console\\meddle\\");
+        Controller controller = new Controller(config);
 
         if (controller.Initialized)
         {

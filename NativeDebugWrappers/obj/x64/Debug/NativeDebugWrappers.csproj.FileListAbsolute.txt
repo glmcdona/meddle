@@ -8,3 +8,4 @@ C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappe
 C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\bin\x64\Debug\NativeDebugWrappers.XML
 C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\obj\x64\Debug\NativeDebugWrappers.dll
 C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\obj\x64\Debug\NativeDebugWrappers.pdb
+C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\NativeDebugWrappers\obj\x64\Debug\NativeDebugWrappers.csprojResolveAssemblyReference.cache
