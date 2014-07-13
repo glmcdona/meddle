@@ -224,7 +224,7 @@ class meddle_types():
 	
 	
 	
-	def parse_HANDLE(self, address, extra_name, size_override):
+	def parse_HANDLE(self, parent_arg, address, extra_name, type_args):
 		# Handles are usually not fuzzed.
 		return [ {"name": extra_name + "HANDLE",
 				  "size": self.size_long(),
@@ -232,13 +232,20 @@ class meddle_types():
 				  "fuzz": NOFUZZ } ]
 
 	  
-	def parse_BUFFER(self, address, extra_name, size_override):
-		return [ {"name": extra_name + "BUFFER",
-				  "size": size_override,
-				  "type": None,
-				  "fuzz": FUZZ } ]
+	def parse_BUFFER(self, parent_arg, address, extra_name, type_args):
+		# type_args can be a "string" of the variable name value to use or integer
+		if type(type_args) is str:
+			# Find the value contents of the specified argument
+			size = parent_arg.GetMemberSearchUp(type_args).ToInt()
+		else:
+			size = type_args
 
-	def parse_OBJECT_ATTRIBUTES(self, address, extra_name, size_override):
+		return [ {"name": extra_name + "BUFFER",
+					  "size": size,
+					  "type": None,
+				  	  "fuzz": FUZZ } ]
+
+	def parse_OBJECT_ATTRIBUTES(self, parent_arg, address, extra_name, type_args):
 		#typedef struct _OBJECT_ATTRIBUTES {
 		#  ULONG           Length;
 		#  HANDLE          RootDirectory;
@@ -272,7 +279,7 @@ class meddle_types():
 				  "type": None,
 				  "fuzz": FUZZ } ]
 
-	def parse_UNICODE_STRING(self, address, extra_name, size_override):
+	def parse_UNICODE_STRING(self, parent_arg, address, extra_name, type_args):
 		#typedef struct _UNICODE_STRING {
 		#  USHORT Length;
 		#  USHORT MaximumLength;
@@ -295,42 +302,79 @@ class meddle_types():
 				  "type": None,
 				  "fuzz": FUZZ } ]
 
-	def parse_BUFFER_PTR(self, address, extra_name, size_override):
+	def parse_WSABUF_ARRAY(self, parent_arg, address, extra_name, type_args):
+		#typedef struct __WSABUF {
+  		#	u_long   len;
+  		#	char FAR *buf;
+		#} WSABUF, *LPWSABUF;
+
+		# type_args can be a "string" of the variable name value to use or integer
+		if type(type_args) is str:
+			# Find the value contents of the specified argument
+			array_size = parent_arg.GetMemberSearchUp(type_args).ToInt()
+		else:
+			array_size = type_args
+
+		retval = []
+		for i in range(array_size):
+			# Add another WSABUF pointer
+			retval += [  {"name": extra_name + "WSABUF%i" % i,
+						  "size": self.size_ptr(),
+						  "type": self.parse_WSABUF,
+						  "fuzz": NOFUZZ } ]
+		return retval
+
+	def parse_WSABUF(self, parent_arg, address, extra_name, type_args):
+		#typedef struct __WSABUF {
+  		#	u_long   len;
+  		#	char FAR *buf;
+		#} WSABUF, *LPWSABUF;
+		return [ {"name": extra_name + "len" % i,
+				  "size": self.size_ptr(),
+				  "type": None,
+				  "fuzz": NOFUZZ },
+				 {"name": extra_name + "buf" % i,
+				  "size": self.size_ptr(),
+				  "type": parse_BUFFER,
+				  "type_args": "len",
+				  "fuzz": NOFUZZ } ]
+
+	def parse_BUFFER_PTR(self, parent_arg, address, extra_name, type_args):
 		return [ {"name": extra_name + "BUFFER_PTR",
 				  "size": self.size_ptr(),
 				  "type": self.parse_BUFFER,
-				  "size_override": size_override,
+				  "type_args": type_args,
 				  "fuzz": FUZZ } ]
 
-	def parse_BUFFER_PTR_TABLE(self, address, extra_name, size_override):
+	def parse_BUFFER_PTR_TABLE(self, parent_arg, address, extra_name, type_args):
 		return [ {"name": extra_name + "BUFFER_PTR1",
 				  "size": self.size_ptr(),
 				  "type": self.parse_BUFFER,
-				  "size_override": size_override,
+				  "type_args": type_args,
 				  "fuzz": FUZZ },
 				  {"name": extra_name + "BUFFER_PTR2",
 				  "size": self.size_ptr(),
 				  "type": self.parse_BUFFER,
-				  "size_override": size_override,
+				  "type_args": type_args,
 				  "fuzz": FUZZ },
 				  {"name": extra_name + "BUFFER_PTR3",
 				  "size": self.size_ptr(),
 				  "type": self.parse_BUFFER,
-				  "size_override": size_override,
+				  "type_args": type_args,
 				  "fuzz": FUZZ },
 				  {"name": extra_name + "BUFFER_PTR4",
 				  "size": self.size_ptr(),
 				  "type": self.parse_BUFFER,
-				  "size_override": size_override,
+				  "type_args": type_args,
 				  "fuzz": FUZZ },
 				  {"name": extra_name + "BUFFER_PTR5",
 				  "size": self.size_ptr(),
 				  "type": self.parse_BUFFER,
-				  "size_override": size_override,
+				  "type_args": type_args,
 				  "fuzz": FUZZ },
 				  {"name": extra_name + "BUFFER_PTR6",
 				  "size": self.size_ptr(),
 				  "type": self.parse_BUFFER,
-				  "size_override": size_override,
+				  "type_args": type_args,
 				  "fuzz": FUZZ } ]
 	

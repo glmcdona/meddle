@@ -27,11 +27,10 @@ namespace Meddle
             Fuzz = (bool)spec.get("fuzz");
             Name = (string)spec.get("name");
             _argumentType = (object)spec.get("type");
-
-            if (spec.ContainsKey("size_override"))
-                _childSizeOverride = (object)spec.get("size_override");
-            else
-                _childSizeOverride = null;
+            if (spec.ContainsKey("type_args"))
+            {
+                _typeArgs = spec.get("type_args");
+            }
 
             // Validate required fields
             if (Name == null)

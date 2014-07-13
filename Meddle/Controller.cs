@@ -67,7 +67,7 @@ namespace Meddle
         }
 
 
-        public Controller(string startScript)
+        public Controller(string startScript, string[] args)
         {
             _scriptPath = System.IO.Path.GetFullPath(startScript);
 
@@ -93,7 +93,7 @@ namespace Meddle
                 // Execute the controller main function
                 try
                 {
-                    PyController.main();
+                    PyController.main(args);
                 }
                 catch (Exception e)
                 {

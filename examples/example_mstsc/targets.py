@@ -89,46 +89,76 @@ class Target_Winsock_Send(TargetBase):
 		self.ProcessBase = ProcessBase
 		
 		# List of libraries to potentially add hooks on.  Must be lowercase.
-		self.libraries = ["ws2_32.dll", "mstscax.dll"]
+		self.libraries = ["ws2_32.dll"]
 		
 		# Regex library name match pattern to add hooks on
 		self.libraries_regex = re.compile("a^",re.IGNORECASE) # match nothing
 		
 		# List of function names to add hooks on.  Must be lowercase.
-		self.functions = ["send"]
+		self.functions = ["send", "wsasend"]
 		
 		# Regex function name match pattern to add hooks on
 		self.functions_regex = re.compile("a^",re.IGNORECASE) # match nothing
 
 		self.hook_exports = True   # Hook matching exports
 		self.hook_symbols = False  # Don't hook matching symbols from pdb
-
 		
 	def breakpoint_hit(self, event_name, address, context, th):
-		parameters = [ {"name": "socket", "size": self.ProcessBase.types.size_ptr(),
-						"type": None, "fuzz": NOFUZZ },
-					   
-					   {"name": "buffer", "size": self.ProcessBase.types.size_ptr(),
-						"type": self.ProcessBase.types.parse_BUFFER, "size_override": "size",
-						"fuzz": NOFUZZ },
-					   
-					   {"name": "size",	"size": self.ProcessBase.types.size_ptr(),
-						"type": None, "fuzz": NOFUZZ },
-					   
-					   {"name": "flags", "size": self.ProcessBase.types.size_ptr(),
-						"type": None, "fuzz": NOFUZZ } ]
+		if event_name == "ws2_32.dll::send":
+			parameters = [ {"name": "socket", "size": self.ProcessBase.types.size_ptr(),
+							"type": None, "fuzz": NOFUZZ },
+						   
+						   {"name": "buffer", "size": self.ProcessBase.types.size_ptr(),
+							"type": self.ProcessBase.types.parse_BUFFER, "type_args": "size",
+							"fuzz": NOFUZZ },
+						   
+						   {"name": "size",	"size": self.ProcessBase.types.size_ptr(),
+							"type": None, "fuzz": NOFUZZ },
+						   
+						   {"name": "flags", "size": self.ProcessBase.types.size_ptr(),
+							"type": None, "fuzz": NOFUZZ } ]
+
+			[reg_spec, stack_spec] = self.ProcessBase.types.pascal( parameters )
+			arguments = self.Engine.ParseArguments(stack_spec, reg_spec, context)
+			
+			
+			if self.ProcessBase.verbose:
+				print "Sent size = %i" % arguments.size.ToInt()
+				print arguments.buffer.BUFFER.ToString()
+
+			return [arguments.GetFuzzBlockDescriptions(), "Winsock Send Event"]
+		elif event_name == "ws2_32.dll::WSASend":
+			parameters = [ {"name": "socket", "size": self.ProcessBase.types.size_ptr(),
+							"type": None, "fuzz": NOFUZZ },
+						   
+						   {"name": "lpBuffers", "size": self.ProcessBase.types.size_ptr(),
+							"type": self.ProcessBase.types.parse_WSABUF_ARRAY, "type_args": "dwBufferCount",
+							"fuzz": NOFUZZ },
+						   
+						   {"name": "dwBufferCount",	"size": self.ProcessBase.types.size_ptr(),
+							"type": None, "fuzz": NOFUZZ },
+						   
+						   {"name": "lpNumberOfBytesSent", "size": self.ProcessBase.types.size_ptr(),
+							"type": None, "fuzz": NOFUZZ },
+
+						   {"name": "dwFlags", "size": self.ProcessBase.types.size_ptr(),
+							"type": None, "fuzz": NOFUZZ },
+
+						   {"name": "lpOverlapped", "size": self.ProcessBase.types.size_ptr(),
+							"type": None, "fuzz": NOFUZZ },
+
+						   {"name": "lpCompletionRoutine", "size": self.ProcessBase.types.size_ptr(),
+							"type": None, "fuzz": NOFUZZ } ]
+			[reg_spec, stack_spec] = self.ProcessBase.types.pascal( parameters )
+			arguments = self.Engine.ParseArguments(stack_spec, reg_spec, context)
+			if self.ProcessBase.verbose:
+				print arguments.lpBuffers.ToString()
+
+			return [arguments.GetFuzzBlockDescriptions(), "Winsock WSASend Event"]
+
+		return [None, None]
+
 		
-		[reg_spec, stack_spec] = self.ProcessBase.types.pascal( parameters )
-		
-		arguments = self.Engine.ParseArguments(stack_spec, reg_spec, context)		
-		
-		if self.ProcessBase.verbose:
-			#print arguments.buffer.BUFFER.ToString("Sent")
-			#print arguments.ToString()
-			print "Sent size = %i" % arguments.size.ToInt()
-			print arguments.buffer.BUFFER.ToString()
-		
-		return [arguments.GetFuzzBlockDescriptions(), "Winsock Send Event"]
 
 
 

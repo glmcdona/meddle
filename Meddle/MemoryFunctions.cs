@@ -52,7 +52,7 @@ namespace MeddleFramework
 	                                             /* 0xE0 */  false,false,false,false,   false,false,false,false,   false,false,false,false,   false,false,false,false,
 	                                             /* 0xF0 */  false,false,false,false,   false,false,false,false,   false,false,false,false,   false,false,false,false};
 
-        public static void getDebugPrivileges()
+        public static void GetDebugPrivileges()
         {
             try
             {
@@ -102,7 +102,7 @@ namespace MeddleFramework
              * */
         }
 
-        public static string reverseString(string input)
+        public static string ReverseString(string input)
         {
             // Reverses the input string
             string result = "";
@@ -116,7 +116,7 @@ namespace MeddleFramework
         /// </summary>
         /// <param name="number"></param>
         /// <returns></returns>
-        public static string intToDwordString(uint number)
+        public static string IntToDwordString(uint number)
         {
             // Convert it to an 4-byte string
             string result = number.ToString("X");
@@ -124,7 +124,7 @@ namespace MeddleFramework
                 result = "0" + result;
 
             // Reverse the string
-            return reverseString(result);
+            return ReverseString(result);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace MeddleFramework
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static float intToFloat(uint input)
+        public static float IntToFloat(uint input)
         {
             // This is untested, I am not sure if I did this perfectly!
             int sign = (input & 0x80000000) == 1 ? -1 : 1;
@@ -140,7 +140,7 @@ namespace MeddleFramework
             return (float)sign * (1.0f + ((float)(input & 0x007fffff)) / ((float)(2 ^ 23))) * (float)(2 ^ (exponent - 127));
         }
 
-        public static UInt64 loadAddress(string dllName, string procedureName, Process process)
+        public static UInt64 LoadAddress(string dllName, string procedureName, Process process)
         {
             // Find the dll in the destination process
             ProcessModule dll = null;
@@ -252,7 +252,7 @@ namespace MeddleFramework
 
 
 
-        public static ProcessModule getModuleFromAddress(Process process, ulong addressLoc)
+        public static ProcessModule GetModuleFromAddress(Process process, ulong addressLoc)
         {
             // This function figures out which module the specified address lies in
             ulong resultBase = 0;
@@ -269,24 +269,24 @@ namespace MeddleFramework
             return resultModule;
         }
 
-        public static byte[] readMemory(Process process, Int64 address, UInt32 length)
+        public static byte[] ReadMemory(Process process, Int64 address, UInt32 length)
         {
-            return readMemory(process, (IntPtr)address, length);
+            return ReadMemory(process, (IntPtr)address, length);
         }
 
-        public static byte readMemoryByte(Process process, UInt64 address)
+        public static byte ReadMemoryByte(Process process, UInt64 address)
         {
-            return readMemoryByte(process, (IntPtr)address);
+            return ReadMemoryByte(process, (IntPtr)address);
         }
 
-        public static ushort readMemoryUShort(Process process, UInt64 address)
+        public static ushort ReadMemoryUShort(Process process, UInt64 address)
         {
-            return readMemoryUShort(process, (IntPtr)address);
+            return ReadMemoryUShort(process, (IntPtr)address);
         }
 
-        public static UInt32 readMemoryDword(Process process, UInt64 address)
+        public static UInt32 ReadMemoryDword(Process process, UInt64 address)
         {
-            return readMemoryDword(process, (IntPtr)address);
+            return ReadMemoryDword(process, (IntPtr)address);
         }
 
         public enum STRING_TYPE
@@ -445,7 +445,7 @@ namespace MeddleFramework
             int chunkSize = 0x100;
             while (moreString)
             {
-                byte[] data = readMemory(process, (long)address, (uint)chunkSize);
+                byte[] data = ReadMemory(process, (long)address, (uint)chunkSize);
                 if (data.Length == 0)
                     return result;
                 int i = 0;
@@ -477,7 +477,7 @@ namespace MeddleFramework
             List<UInt64> result = new List<ulong>();
 
             // Read in the module memory
-            byte[] data = readMemory(processDotNet, moduleBase, size);
+            byte[] data = ReadMemory(processDotNet, moduleBase, size);
 
             // Find the matches
             for (int i = 0; i < data.Length - pattern.Length; i++)
@@ -498,7 +498,7 @@ namespace MeddleFramework
             return result;
         }
 
-        public static byte[] readMemory(Process process, IntPtr address, UInt32 length)
+        public static byte[] ReadMemory(Process process, IntPtr address, UInt32 length)
         {
             // Copy the bytes from this heap
             byte[] buffer = new byte[length];
@@ -530,7 +530,7 @@ namespace MeddleFramework
         }
 
 
-        public static byte readMemoryByte(Process process, IntPtr address)
+        public static byte ReadMemoryByte(Process process, IntPtr address)
         {
             // Copy the bytes from this heap
             byte[] buffer = new byte[1];
@@ -545,7 +545,7 @@ namespace MeddleFramework
         }
 
 
-        public static ushort readMemoryUShort(Process process, IntPtr address)
+        public static ushort ReadMemoryUShort(Process process, IntPtr address)
         {
             // Copy the bytes from this heap
             byte[] buffer = new byte[2];
@@ -561,7 +561,7 @@ namespace MeddleFramework
 
 
 
-        public static UInt32 readMemoryDword(Process process, IntPtr address)
+        public static UInt32 ReadMemoryDword(Process process, IntPtr address)
         {
             // Copy the bytes from this heap
             byte[] buffer = new byte[4];
@@ -580,7 +580,7 @@ namespace MeddleFramework
             return (UInt32)RawDataToObject(ref buffer, typeof(UInt32));
         }
 
-        public static UInt64 readMemoryQword(Process process, IntPtr address)
+        public static UInt64 ReadMemoryQword(Process process, IntPtr address)
         {
             // Copy the bytes from this heap
             byte[] buffer = new byte[8];
@@ -594,7 +594,7 @@ namespace MeddleFramework
             return (UInt64)RawDataToObject(ref buffer, typeof(UInt64));
         }
 
-        public static string readMemoryString(Process process, UInt64 address, int maxLength)
+        public static string ReadMemoryString(Process process, UInt64 address, int maxLength)
         {
             // Copy the bytes from this heap
             byte[] buffer = new byte[maxLength];
@@ -707,13 +707,13 @@ namespace MeddleFramework
             return result;
         }
 
-        public static void clearMemory(Process process, uint address, uint length)
+        public static void ClearMemory(Process process, uint address, uint length)
         {
             byte[] blankData = new byte[length];
             WriteMemory(process, (ulong)address, blankData);
         }
 
-        public static void writeString(Process process, UInt64 address, String data)
+        public static void WriteString(Process process, UInt64 address, String data)
         {
             char[] bufferChar = data.ToCharArray();
             byte[] buffer = new byte[bufferChar.Length + 1];
@@ -768,7 +768,7 @@ namespace MeddleFramework
         /// </summary>
         /// <param name="dword"></param>
         /// <returns></returns>
-        public static uint byteArrayToUint(byte[] data, int index)
+        public static uint ByteArrayToUint(byte[] data, int index)
         {
             int i = 0;
             uint result = 0;
@@ -779,7 +779,7 @@ namespace MeddleFramework
             }
             return result;
         }
-        public static uint byteArrayToUint(List<byte> data, int index)
+        public static uint ByteArrayToUint(List<byte> data, int index)
         {
             int i = 0;
             uint result = 0;
@@ -791,7 +791,7 @@ namespace MeddleFramework
             return result;
         }
 
-        public static ulong byteArrayToUlong(byte[] data, int index)
+        public static ulong ByteArrayToUlong(byte[] data, int index)
         {
             int i = 0;
             ulong result = 0;
@@ -808,14 +808,14 @@ namespace MeddleFramework
         /// </summary>
         /// <param name="dword"></param>
         /// <returns></returns>
-        public static ushort byteArrayToUshort(byte[] data, int index)
+        public static ushort ByteArrayToUshort(byte[] data, int index)
         {
             if (data.Length - index >= 2)
                 return (ushort)(data[0 + index] + (data[1 + index] << 8));
             else
                 return 0;
         }
-        public static ushort byteArrayToUshort(List<byte> data, int index)
+        public static ushort ByteArrayToUshort(List<byte> data, int index)
         {
             if (data.Count - index >= 2)
                 return (ushort)(data[0 + index] + (data[1 + index] << 8));
@@ -828,7 +828,7 @@ namespace MeddleFramework
         /// </summary>
         /// <param name="process"></param>
         /// <returns></returns>
-        public static HEAP_INFO lookupAddressInMap(List<HEAP_INFO> map, uint address)
+        public static HEAP_INFO LookupAddressInMap(List<HEAP_INFO> map, uint address)
         {
             // Loop through the heaps
             foreach (HEAP_INFO heap in map)
@@ -845,7 +845,7 @@ namespace MeddleFramework
         }
 
 
-        public static bool isValidReadPointer(List<addressRegion> heaps, Int64 address)
+        public static bool IsValidReadPointer(List<addressRegion> heaps, Int64 address)
         {
             int index = heaps.BinarySearch(new addressRegion(address, 0));
             if (index < 0)
@@ -858,7 +858,7 @@ namespace MeddleFramework
             return false;
         }
 
-        public static List<addressRegion> getValidReadHeaps(Process process)
+        public static List<addressRegion> GetValidReadHeaps(Process process)
         {
             List<addressRegion> result = new List<addressRegion>(200);
 
@@ -885,7 +885,7 @@ namespace MeddleFramework
             return result;
         }
 
-        public static List<addressRegion> getValidReadHeaps(List<HEAP_INFO> map)
+        public static List<addressRegion> GetValidReadHeaps(List<HEAP_INFO> map)
         {
             // Create the table
             List<addressRegion> result = new List<addressRegion>(map.Count);
@@ -937,7 +937,7 @@ namespace MeddleFramework
         /// </summary>
         /// <param name="process"></param>
         /// <returns></returns>
-        public static byte[] generateValidReadPointerTableFromMap(List<HEAP_INFO> map)
+        public static byte[] GenerateValidReadPointerTableFromMap(List<HEAP_INFO> map)
         {
             // Create the table
             byte[] lookupTable = new byte[0x80000];
@@ -971,7 +971,7 @@ namespace MeddleFramework
         /// </summary>
         /// <param name="process"></param>
         /// <returns></returns>
-        public static List<HEAP_INFO> generateMemoryMap(Process process)
+        public static List<HEAP_INFO> GenerateMemoryMap(Process process)
         {
             try
             {
@@ -1043,29 +1043,14 @@ namespace MeddleFramework
         /// </summary>
         /// <param name="hex"></param>
         /// <returns></returns>
-        public static string makeFixedLengthHexString(string hex, int length)
+        public static string MakeFixedLengthHexString(string hex, int length)
         {
             while (hex.Length < length)
                 hex = "0" + hex;
             return hex;
         }
 
-        public static string toHex(byte[] hex)
-        {
-            // Convert the array into hex readable text
-            string result = "";
-            for (int index = 0; index < hex.Length; index++)
-            {
-                if (hex[index].ToString("X").Length == 1)
-                    result = result + "0" + hex[index].ToString("X") + " ";
-                else
-                    result = result + hex[index].ToString("X") + " ";
-            }
-            result.TrimEnd(new char[] { ' ' });
-            return result;
-        }
-
-        public static byte[] hexStringToByteArray(string text)
+        public static byte[] HexStringToByteArray(string text)
         {
             string tmpText = text.Replace(" ", "").ToLower();
             if ((tmpText.Length % 2) != 0 || tmpText.Length == 0)
@@ -1081,7 +1066,7 @@ namespace MeddleFramework
             return result;
         }
 
-        public static byte[] textToByteArray_ascii(string text)
+        public static byte[] TextToByteArray_ascii(string text)
         {
             // Parse the hex string
             byte[] result = new byte[text.Length];
@@ -1092,7 +1077,7 @@ namespace MeddleFramework
             return result;
         }
 
-        public static byte[] textToByteArray_unicode(string text)
+        public static byte[] TextToByteArray_unicode(string text)
         {
             // Parse the unicode ascii string
             byte[] result = new byte[text.Length * 2];
@@ -1106,7 +1091,7 @@ namespace MeddleFramework
             return result;
         }
 
-        public static bool byteArrayInByByteArray(byte[] largerArray, uint lengthLargerArray, byte[] contains)
+        public static bool ByteArrayInByByteArray(byte[] largerArray, uint lengthLargerArray, byte[] contains)
         {
             if (largerArray == null || contains == null) return false;
             if (largerArray.Length < lengthLargerArray) lengthLargerArray = (uint)largerArray.Length;
@@ -1127,7 +1112,7 @@ namespace MeddleFramework
             return false;
         }
 
-        public static string toHex(byte[] hex, uint length)
+        public static string ToHex(byte[] hex, uint length)
         {
             if (length > hex.Length) length = (uint)hex.Length;
             // Convert the array into hex readable text
@@ -1143,44 +1128,13 @@ namespace MeddleFramework
             return result;
         }
 
-        public static string toAscii(byte[] hex)
-        {
-            // Convert the array into ascii readable text
-            string result = "";
-            for (int index = 0; index < hex.Length; index++)
-            {
-                if (hex[index] >= 32)
-                    result += new string((char)hex[index], 1);
-                else
-                    result += "?";
-            }
-            result.TrimEnd(new char[] { ' ' });
-            return result;
-        }
-
-        public static string toAscii(byte[] hex, uint length)
-        {
-            if (length > hex.Length) length = (uint)hex.Length;
-            // Convert the array into ascii readable text
-            string result = "";
-            for (int index = 0; index < length; index++)
-            {
-                if (hex[index] >= 32)
-                    result += new string((char)hex[index], 1);
-                else
-                    result += "?";
-            }
-            result.TrimEnd(new char[] { ' ' });
-            return result;
-        }
-
         /// <summary>
         /// Creates a remote thread in the process starting at the specified address
         /// </summary>
         /// <param name="process"></param>
         /// <param name="address"></param>
         /// <returns></returns>
-        public static IntPtr createThread(Process process, ulong address)
+        public static IntPtr CreateThread(Process process, ulong address)
         {
             uint threadIdentifier;
             IntPtr result = CreateRemoteThread(process.Handle, (IntPtr)null, 10000, (IntPtr)address, (IntPtr)null, 0, out threadIdentifier);
@@ -1205,7 +1159,7 @@ namespace MeddleFramework
         /// </summary>
         /// <param name="hex">Hex characters to check</param>
         /// <returns>True if they are all valid hex characters.</returns>
-        public static bool isValidHex(string hex)
+        public static bool IsValidHex(string hex)
         {
             // Must be even number of characters
             if ((hex.Length % 2) != 0)

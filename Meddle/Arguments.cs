@@ -22,7 +22,7 @@ namespace Meddle
         protected PythonBoss _pyBoss;
         protected Arguments _parent;
         protected object _argumentType;
-        protected object _childSizeOverride;
+        protected object _typeArgs;
 
         public Argument()
         {
@@ -42,15 +42,16 @@ namespace Meddle
             //		      "size": 4,
             //		      "type": None,
             //		      "fuzz": NOFUZZ,
-            //            "size_override": None},]
+            //            "type_args": None},]
             
             Fuzz = (bool)spec.get("fuzz");
             Name = (string)spec.get("name");
             _argumentType = (object)spec.get("type");
-            if (spec.ContainsKey("size_override"))
-                _childSizeOverride = (object) spec.get("size_override");
-            else
-                _childSizeOverride = null;
+            if ( spec.ContainsKey("type_args") )
+            {
+                _typeArgs = spec.get("type_args");
+            }
+            
 
             // Validate required fields
             if (Name == null)
@@ -79,7 +80,7 @@ namespace Meddle
             }
 
             // Read the data
-            Data = MemoryFunctions.readMemory(process.ProcessDotNet, address, (uint)Size);
+            Data = MemoryFunctions.ReadMemory(process.ProcessDotNet, address, (uint)Size);
 
             PointerTarget = null;
         }
@@ -92,12 +93,12 @@ namespace Meddle
             {
                 long targetAddress = 0;
                 if (Size == 4 || Size == 8)
-                    targetAddress = (long)MemoryFunctions.byteArrayToUlong(Data, 0);
+                    targetAddress = (long)MemoryFunctions.ByteArrayToUlong(Data, 0);
                 else
                     throw new Exception("Argument type definition problem. A pointer to another type must be a size of 4 or 8. Argument name: " + Name + ". The unsupported size being specified is: " + Size.ToString());
 
                 // Load the spec for the the target type
-                List pointerSpec = _pyBoss.PyScope.Engine.Operations.Invoke(_argumentType, new object[] { targetAddress, "", _childSizeOverride });
+                List pointerSpec = _pyBoss.PyScope.Engine.Operations.Invoke(_argumentType, new object[] { _parent, targetAddress, "", _typeArgs });
 
                 PointerTarget = new Arguments(_pyBoss, targetAddress,
                                               pointerSpec, process, depth + 1, this, NamePrefix + Name + ".");
@@ -116,9 +117,9 @@ namespace Meddle
             if (PointerTarget != null)
             {
                 if (Size == 4)
-                    PointerTarget.Reparse(MemoryFunctions.byteArrayToUint(Data, 0));
+                    PointerTarget.Reparse(MemoryFunctions.ByteArrayToUint(Data, 0));
                 else if (Size == 8)
-                    PointerTarget.Reparse((long)MemoryFunctions.byteArrayToUlong(Data, 0));
+                    PointerTarget.Reparse((long)MemoryFunctions.ByteArrayToUlong(Data, 0));
             }
         }
 
@@ -174,16 +175,26 @@ namespace Meddle
             return _parent.TryGetMemberSearchUp(name, out result); ;
         }
 
+        public Argument GetMemberSearchUp(string name)
+        {
+            if (_parent == null)
+            {
+                return null;
+            }
+
+            return _parent.GetMemberSearchUp(name); ;
+        }
+
         public int ToInt()
         {
             // Return the data an int
-            return (int)MemoryFunctions.byteArrayToUint(Data, 0);
+            return (int)MemoryFunctions.ByteArrayToUint(Data, 0);
         }
 
         public long ToLong()
         {
             // Return the data a long
-            return (long)MemoryFunctions.byteArrayToUlong(Data, 0);
+            return (long)MemoryFunctions.ByteArrayToUlong(Data, 0);
         }
 
         public long ToPtr()
@@ -349,7 +360,20 @@ namespace Meddle
             if (_parent == null)
                 return false;
 
-            return _parent.TryGetMemberSearchUp(name.ToLower(), out result); ;
+            return _parent.TryGetMemberSearchUp(name.ToLower(), out result);
+        }
+
+        public Argument GetMemberSearchUp(string name)
+        {
+            // Try to find the name in this arguments set of arguments
+            object result;
+            if (_parsedFields.TryGetValue(name.ToLower(), out result))
+                return (Argument) result;
+
+            if (_parent == null)
+                return null; // not found and can't go up
+
+            return _parent.GetMemberSearchUp(name);
         }
 
         // If you try to set a value of a property that is 
@@ -383,7 +407,7 @@ namespace Meddle
             _address = address;
 
             // Read in all arguments in this block
-            byte[] data = MemoryFunctions.readMemory(_process.ProcessDotNet, address, (uint)_size);
+            byte[] data = MemoryFunctions.ReadMemory(_process.ProcessDotNet, address, (uint)_size);
             for (int i = 0; i < _args.Count; i++)
             {
                 _args[i].Reparse(data, _arg_offsets[i]);

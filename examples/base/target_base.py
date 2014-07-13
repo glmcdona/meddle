@@ -82,6 +82,7 @@ class TargetBase:
 		exports = self.Engine.GetExportedFunctions(header)
 		
 		# Consider each export
+		count = 0
 		for export in exports:
 			if export.lower() in self.functions or re.match(self.functions_regex, export):
 				# Lookup the corresonding address
@@ -89,7 +90,10 @@ class TargetBase:
 				
 				# Add the breakpoint with eventname "{module}::{function name}"
 				self.Engine.AddBreakpoint(self, address, "%s::%s" % (library_name, export))
-				#self.ProcessBase.log( "adding hook %s, 0x%x" % ( "%s::%s" % (library_name, export), address ) )
+				count+=1
+		
+		if self.ProcessBase.verbose:
+			print "added %i hooks on exports in %s" % ( count, library_name ) 
 
 	def add_hooks_symbols(self, library_name, library_path, library_base):
 		# Extract or load the symbols for this library		
@@ -115,6 +119,7 @@ class TargetBase:
 		f.close()
 
 		# Walk through the symbols, setting breakpoints
+		count = 0
 		for symbol in symbol_rows:
 			split_symbol = symbol.split(" ")
 			if len(split_symbol) == 2:
@@ -123,6 +128,10 @@ class TargetBase:
 					# Add a breakpoint
 					symbol_address = int(split_symbol[0],16) + library_base
 					self.Engine.AddBreakpoint(self, symbol_address, "%s::%s" % (library_name, symbol_name))
+					count+=1
+
+		if self.ProcessBase.verbose:
+			print "added %i hooks on symbols in %s" % ( count, library_name ) 
 
 	def __init__(self, Engine, ProcessBase):
 		self.Engine = Engine

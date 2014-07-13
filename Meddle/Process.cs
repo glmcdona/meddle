@@ -465,22 +465,22 @@ namespace Meddle
 
         public int ReadByte(object address)
         {
-            return (int)MemoryFunctions.readMemoryByte(ProcessDotNet, (IntPtr)(UInt64)address);
+            return (int)MemoryFunctions.ReadMemoryByte(ProcessDotNet, (IntPtr)(UInt64)address);
         }
 
         public int ReadWord(object address)
         {
-            return (int)MemoryFunctions.readMemoryUShort(ProcessDotNet, (IntPtr)(UInt64)address);
+            return (int)MemoryFunctions.ReadMemoryUShort(ProcessDotNet, (IntPtr)(UInt64)address);
         }
 
         public int ReadDword(Int64 address)
         {
-            return (int)MemoryFunctions.readMemoryDword(ProcessDotNet, (IntPtr)address);
+            return (int)MemoryFunctions.ReadMemoryDword(ProcessDotNet, (IntPtr)address);
         }
 
         public UInt64 ReadQword(object address)
         {
-            return (UInt64)MemoryFunctions.readMemoryQword(ProcessDotNet, (IntPtr)(UInt64)address);
+            return (UInt64)MemoryFunctions.ReadMemoryQword(ProcessDotNet, (IntPtr)(UInt64)address);
         }
 
         public UInt64[] GetProcedureAddresses(string library, object procedures)

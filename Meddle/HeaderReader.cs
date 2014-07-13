@@ -152,7 +152,7 @@ namespace MeddleFramework
             UInt64 address = (UInt64) process.MainModule.BaseAddress;
 
             // Read in the Image Dos Header
-            byte[] headerData = MemoryFunctions.readMemory(process, (IntPtr)address, (uint)Marshal.SizeOf(typeof(IMAGE_DOS_HEADER)));
+            byte[] headerData = MemoryFunctions.ReadMemory(process, (IntPtr)address, (uint)Marshal.SizeOf(typeof(IMAGE_DOS_HEADER)));
             IMAGE_DOS_HEADER dosHeader = (IMAGE_DOS_HEADER)MemoryFunctions.RawDataToObject(ref headerData, typeof(IMAGE_DOS_HEADER));
 
             // Load the PE Address
@@ -168,7 +168,7 @@ namespace MeddleFramework
             }
 
             // Read in the PE token
-            byte[] PE_Token = MemoryFunctions.readMemory(process, (IntPtr)PE_header, 4);
+            byte[] PE_Token = MemoryFunctions.ReadMemory(process, (IntPtr)PE_header, 4);
             if (!(PE_Token[0] == 'P' & PE_Token[1] == 'E' & PE_Token[2] == 0 & PE_Token[3] == 0))
             {
                 // Problem, we are not pointing at a correct PE header. Abort.
@@ -176,7 +176,7 @@ namespace MeddleFramework
             }
 
             // Input the COFFHeader
-            byte[] coffHeader_rawData = MemoryFunctions.readMemory(process, (IntPtr)(PE_header + 4), (uint)Marshal.SizeOf(typeof(COFFHeader)));
+            byte[] coffHeader_rawData = MemoryFunctions.ReadMemory(process, (IntPtr)(PE_header + 4), (uint)Marshal.SizeOf(typeof(COFFHeader)));
             COFFHeader coffHeader = (COFFHeader)MemoryFunctions.RawDataToObject(ref coffHeader_rawData, typeof(COFFHeader));
 
             return ((MACHINE)coffHeader.Machine) == MACHINE.IMAGE_FILE_MACHINE_IA64 || ((MACHINE)coffHeader.Machine) == MACHINE.IMAGE_FILE_MACHINE_AMD64;
@@ -192,7 +192,7 @@ namespace MeddleFramework
         public static bool isPeHeader(System.Diagnostics.Process process, UInt64 address)
         {
             // Read in the Image Dos Header
-            byte[] headerData = MemoryFunctions.readMemory(process, (IntPtr)address,
+            byte[] headerData = MemoryFunctions.ReadMemory(process, (IntPtr)address,
                                                             (uint)Marshal.SizeOf(typeof(IMAGE_DOS_HEADER)));
             IMAGE_DOS_HEADER dosHeader = (IMAGE_DOS_HEADER)MemoryFunctions.RawDataToObject(ref headerData, typeof(IMAGE_DOS_HEADER));
 
@@ -212,7 +212,7 @@ namespace MeddleFramework
             if (PE_header <= 0x7FFFFFFF)
             {
                 // Read in the PE token
-                byte[] PE_Token = MemoryFunctions.readMemory(process, (IntPtr)PE_header, 4);
+                byte[] PE_Token = MemoryFunctions.ReadMemory(process, (IntPtr)PE_header, 4);
                 if (!(PE_Token[0] == 'P' & PE_Token[1] == 'E' & PE_Token[2] == 0 & PE_Token[3] == 0))
                 {
                     // Problem, we are not pointing at a correct PE header. Abort.
@@ -220,14 +220,14 @@ namespace MeddleFramework
                 }
 
                 // Input the COFFHeader
-                byte[] coffHeader_rawData = MemoryFunctions.readMemory(process, (IntPtr)(PE_header + 4), (uint)Marshal.SizeOf(typeof(COFFHeader)));
+                byte[] coffHeader_rawData = MemoryFunctions.ReadMemory(process, (IntPtr)(PE_header + 4), (uint)Marshal.SizeOf(typeof(COFFHeader)));
                 COFFHeader coffHeader = (COFFHeader)MemoryFunctions.RawDataToObject(ref coffHeader_rawData, typeof(COFFHeader));
 
                 // Read in the PEOptHeader if it exists
                 if (coffHeader.SizeOfOptionalHeader != 0 && coffHeader.SizeOfOptionalHeader < 0x1000)
                 {
                     // Read in the optHeader
-                    byte[] optHeader_rawData = MemoryFunctions.readMemory(process, (IntPtr)(PE_header + 4 + (uint)Marshal.SizeOf(typeof(COFFHeader))), coffHeader.SizeOfOptionalHeader);
+                    byte[] optHeader_rawData = MemoryFunctions.ReadMemory(process, (IntPtr)(PE_header + 4 + (uint)Marshal.SizeOf(typeof(COFFHeader))), coffHeader.SizeOfOptionalHeader);
                     PEOptHeader optHeader = new PEOptHeader(ref optHeader_rawData, 0, optHeader_rawData.Length);
 
                     // Confirm that it loaded correctly
@@ -269,7 +269,7 @@ namespace MeddleFramework
 
             // Read in the Image Dos Header
             importTable = new List<IMPORT_FUNCTION>(0);
-            byte[] headerData = MemoryFunctions.readMemory(process, (IntPtr)address, (uint)Marshal.SizeOf(typeof(IMAGE_DOS_HEADER)));
+            byte[] headerData = MemoryFunctions.ReadMemory(process, (IntPtr)address, (uint)Marshal.SizeOf(typeof(IMAGE_DOS_HEADER)));
             dosHeader = (IMAGE_DOS_HEADER)MemoryFunctions.RawDataToObject(ref headerData, typeof(IMAGE_DOS_HEADER));
 
             // Load the PE Address
@@ -285,7 +285,7 @@ namespace MeddleFramework
             }
 
             // Read in the PE token
-            byte[] PE_Token = MemoryFunctions.readMemory(process, (IntPtr)PE_header, 4);
+            byte[] PE_Token = MemoryFunctions.ReadMemory(process, (IntPtr)PE_header, 4);
             if (!(PE_Token[0] == 'P' & PE_Token[1] == 'E' & PE_Token[2] == 0 & PE_Token[3] == 0))
             {
                 // Problem, we are not pointing at a correct PE header. Abort.
@@ -294,14 +294,14 @@ namespace MeddleFramework
             }
 
             // Input the COFFHeader
-            byte[] coffHeader_rawData = MemoryFunctions.readMemory(process, (IntPtr)(PE_header + 4), (uint)Marshal.SizeOf(typeof(COFFHeader)));
+            byte[] coffHeader_rawData = MemoryFunctions.ReadMemory(process, (IntPtr)(PE_header + 4), (uint)Marshal.SizeOf(typeof(COFFHeader)));
             coffHeader = (COFFHeader)MemoryFunctions.RawDataToObject(ref coffHeader_rawData, typeof(COFFHeader));
 
             // Read in the PEOptHeader if it exists
             if (coffHeader.SizeOfOptionalHeader != 0 && coffHeader.SizeOfOptionalHeader < 0x1000)
             {
                 // Read in the optHeader
-                byte[] optHeader_rawData = MemoryFunctions.readMemory(process, (IntPtr)(PE_header + 4 + (uint)Marshal.SizeOf(typeof(COFFHeader))), coffHeader.SizeOfOptionalHeader);
+                byte[] optHeader_rawData = MemoryFunctions.ReadMemory(process, (IntPtr)(PE_header + 4 + (uint)Marshal.SizeOf(typeof(COFFHeader))), coffHeader.SizeOfOptionalHeader);
                 PEOptHeader optHeader = new PEOptHeader(ref optHeader_rawData, 0, coffHeader.SizeOfOptionalHeader);
 
                 // Confirm that it loaded correctly
@@ -358,7 +358,7 @@ namespace MeddleFramework
                 Int64 exportTableAddress = (Int64)optHeader.DataDirectory1_export.VirtualAddress + (Int64)address;
 
                 // Read in the first _IMAGE_EXPORT_DIRECTORY structure
-                byte[] export_directory_rawData = MemoryFunctions.readMemory(process, exportTableAddress, (uint)Marshal.SizeOf(typeof(_IMAGE_EXPORT_DIRECTORY)));
+                byte[] export_directory_rawData = MemoryFunctions.ReadMemory(process, exportTableAddress, (uint)Marshal.SizeOf(typeof(_IMAGE_EXPORT_DIRECTORY)));
                 _IMAGE_EXPORT_DIRECTORY export_directory = (_IMAGE_EXPORT_DIRECTORY)MemoryFunctions.RawDataToObject(ref export_directory_rawData, typeof(_IMAGE_EXPORT_DIRECTORY));
                 exports = new Hashtable(20);
 
@@ -368,7 +368,7 @@ namespace MeddleFramework
                 UInt64 functionAddressArray = (UInt64)export_directory.AddressOfFunctions + address;
                 for (int i = 0; i < export_directory.NumberOfNames; i++)
                 {
-                    int ordinal_relative = (int)MemoryFunctions.readMemoryUShort(process, functionOrdinalArray + (UInt64)i * 2);
+                    int ordinal_relative = (int)MemoryFunctions.ReadMemoryUShort(process, functionOrdinalArray + (UInt64)i * 2);
                     int ordinal = ordinal_relative + (int)export_directory.Base;
 
                     if (ordinal_relative < export_directory.NumberOfFunctions)
@@ -376,7 +376,7 @@ namespace MeddleFramework
                         // Continue with importing this function
                         string name = "";
                         if (i < export_directory.NumberOfNames)
-                            name = MemoryFunctions.ReadString(process, (UInt64)MemoryFunctions.readMemoryDword(process, functionNameArray + (UInt64)i * 4) + address, MemoryFunctions.STRING_TYPE.ascii);
+                            name = MemoryFunctions.ReadString(process, (UInt64)MemoryFunctions.ReadMemoryDword(process, functionNameArray + (UInt64)i * 4) + address, MemoryFunctions.STRING_TYPE.ascii);
                         else
                             name = "oridinal" + ordinal.ToString();
 
@@ -385,7 +385,7 @@ namespace MeddleFramework
                         // Lookup the function rva now
                         try
                         {
-                            UInt64 offset = (UInt64)MemoryFunctions.readMemoryDword(process, functionAddressArray + (UInt64)ordinal_relative * 4);
+                            UInt64 offset = (UInt64)MemoryFunctions.ReadMemoryDword(process, functionAddressArray + (UInt64)ordinal_relative * 4);
 
                             // Check to see if this is a forwarded export
                             if (offset < optHeader.DataDirectory1_export.VirtualAddress ||
@@ -981,7 +981,7 @@ namespace MeddleFramework
         public section(System.Diagnostics.Process process, UInt64 address)
         {
             // Parse the section struct
-            byte[] headerData = MemoryFunctions.readMemory(process, (IntPtr)address, (uint)Marshal.SizeOf(typeof(IMAGE_SECTION_HEADER)));
+            byte[] headerData = MemoryFunctions.ReadMemory(process, (IntPtr)address, (uint)Marshal.SizeOf(typeof(IMAGE_SECTION_HEADER)));
             _sectionHeader = (IMAGE_SECTION_HEADER)MemoryFunctions.RawDataToObject(ref headerData, typeof(IMAGE_SECTION_HEADER));
         }
 
@@ -1023,7 +1023,7 @@ namespace MeddleFramework
             {
                 // Read in the descriptor table with names
                 int i = 0;
-                uint newAddress = MemoryFunctions.readMemoryDword(process,
+                uint newAddress = MemoryFunctions.ReadMemoryDword(process,
                                                                    (ulong)descriptor.OriginalFirstThunk +
                                                                    (ulong)baseAddress + (ulong)i * 4);
                 while (newAddress != 0)
@@ -1037,13 +1037,13 @@ namespace MeddleFramework
                         // Export by ordinal
                         newAddress = newAddress & 0x7fffffff;
                         Names.Add("ordinal 0x" +
-                                  MemoryFunctions.readMemoryUShort(process, (UInt64)newAddress + baseAddress).
+                                  MemoryFunctions.ReadMemoryUShort(process, (UInt64)newAddress + baseAddress).
                                       ToString("X"));
                     }
                     else if (newAddress > 0)
                     {
                         // Export by name
-                        Names.Add(MemoryFunctions.readMemoryString(process, (UInt64)newAddress + baseAddress + 2, 256));
+                        Names.Add(MemoryFunctions.ReadMemoryString(process, (UInt64)newAddress + baseAddress + 2, 256));
                     }
                     else
                     {
@@ -1056,7 +1056,7 @@ namespace MeddleFramework
 
                     // Read in the next value
                     i++;
-                    newAddress = MemoryFunctions.readMemoryDword(process,
+                    newAddress = MemoryFunctions.ReadMemoryDword(process,
                                                                   (ulong)descriptor.OriginalFirstThunk +
                                                                   (ulong)baseAddress + (ulong)i * 4);
                 }
@@ -1071,7 +1071,7 @@ namespace MeddleFramework
                 if (addressThunk == 0)
                     return; // We have no imports that we can read in.
 
-                uint newAddress = MemoryFunctions.readMemoryDword(process,
+                uint newAddress = MemoryFunctions.ReadMemoryDword(process,
                                                                    addressThunk +
                                                                    (ulong)baseAddress + (ulong)i * 4);
                 while (newAddress != 0)
@@ -1084,7 +1084,7 @@ namespace MeddleFramework
 
                     // Read in the next value
                     i++;
-                    newAddress = MemoryFunctions.readMemoryDword(process,
+                    newAddress = MemoryFunctions.ReadMemoryDword(process,
                                                                    addressThunk +
                                                                    (ulong)baseAddress + (ulong)i * 4);
                 }

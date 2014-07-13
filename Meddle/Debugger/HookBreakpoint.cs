@@ -508,7 +508,7 @@ namespace Meddle
                 {
                     case "api":
                         // Resolve an api import
-                        ulong address = MemoryFunctions.loadAddress(item.Element("Library").Value.ToString(), item.Element("Procedure").Value.ToString(), _process.ProcessDotNet);
+                        ulong address = MemoryFunctions.LoadAddress(item.Element("Library").Value.ToString(), item.Element("Procedure").Value.ToString(), _process.ProcessDotNet);
                         return (_process.IsWin64 ? (UInt64)address : (UInt32)address);
 
 

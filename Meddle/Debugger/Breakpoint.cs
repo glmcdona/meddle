@@ -40,7 +40,7 @@ namespace Meddle
             // Set breakpoint
             if (!_byteIsSaved)
             {
-                _savedByte = MemoryFunctions.readMemoryByte(_process.ProcessDotNet, (ulong)_address);
+                _savedByte = MemoryFunctions.ReadMemoryByte(_process.ProcessDotNet, (ulong)_address);
                 _byteIsSaved = true;
             }
             if (!_bpSet)
@@ -66,7 +66,7 @@ namespace Meddle
             }
 
             // TODO: Remove this validation test code
-            if (MemoryFunctions.readMemoryByte(_process.ProcessDotNet, _address) != 0xCC)
+            if (MemoryFunctions.ReadMemoryByte(_process.ProcessDotNet, _address) != 0xCC)
                 Console.WriteLine("Failed to set breakpoint.");
         }
 

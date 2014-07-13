@@ -144,16 +144,16 @@ namespace Meddle
             switch (_size)
             {
                 case 1:
-                    return MemoryFunctions.readMemoryByte(_process, _address);
+                    return MemoryFunctions.ReadMemoryByte(_process, _address);
 
                 case 2:
-                    return MemoryFunctions.readMemoryUShort(_process, _address);
+                    return MemoryFunctions.ReadMemoryUShort(_process, _address);
 
                 case 4:
-                    return MemoryFunctions.readMemoryDword(_process, _address);
+                    return MemoryFunctions.ReadMemoryDword(_process, _address);
 
                 case 8:
-                    return MemoryFunctions.readMemoryQword(_process, _address);
+                    return MemoryFunctions.ReadMemoryQword(_process, _address);
 
                 default:
                     throw new Exception("ERROR: Unable to read fuzzblock value. Block sizes of only 1, 2, 4, or 8 are supported.");
