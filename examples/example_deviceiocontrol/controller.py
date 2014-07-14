@@ -58,7 +58,7 @@ class Controller:
 			if printOnly:
 				sleep(10000)
 			else:
-				sleep(5)
+				sleep(10)
 				
 			mProcess.stop()
 			measurements = mBreakpoint.measurement
@@ -87,7 +87,9 @@ class Controller:
 			for name, count in sorted(report_blocks_by_target.iteritems(), key=operator.itemgetter(1), reverse=True):
 				print "%i\t%s" % (count, name)
 			print "\n\n"
-			raw_input("Press any key to begin attack...\n")
+
+			print "ALERT: Fuzzing device communication may result in corrupting files or other damage depending on usage."
+			raw_input("Press any key to begin attack. I understand this has the potential to cause damage.\n")
 			
 			# Run the auto-it script that will press "Cancel" on the watson crash dump. Unfortunately this has to be clicked
 			# before the process is terminated in order for a proper crashdump to be created it seems.

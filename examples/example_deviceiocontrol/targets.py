@@ -174,7 +174,7 @@ class Target_DeviceIoControl(TargetBase):
 			fields["data_base64"] = arguments.InputBuffer.BUFFER.ToBase64()
 			self.ProcessBase.log_csv(fields)
 			
-			return [arguments.InputBuffer.GetFuzzBlockDescriptions(), "Send %s" % name]
+			return [arguments.InputBuffer.GetFuzzBlockDescriptions(), name]
 			
 			
 		elif event_name == "return buffer":
@@ -205,7 +205,7 @@ class Target_DeviceIoControl(TargetBase):
 				self.ProcessBase.log_csv(fields)
 
 				self.Engine.RemoveBreakpoint(self, address)
-				return [arguments.OutputBuffer.GetFuzzBlockDescriptions(), "Receive %s" % name]
+				return [arguments.OutputBuffer.GetFuzzBlockDescriptions(), name]
 
 			self.Engine.RemoveBreakpoint(self, address)
 
