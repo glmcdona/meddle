@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace MeddleFramework
 {
@@ -249,6 +250,68 @@ namespace MeddleFramework
         }*/
 
 
+        public struct PROCESS_MODULE
+        {
+            public string Name;
+            public string FullPath;
+            public Int64 BaseAddress;
+
+            public PROCESS_MODULE(string name, string fullPath, Int64 baseAddress)
+            {
+                Name = name;
+                FullPath = fullPath;
+                BaseAddress = baseAddress;
+            }
+        }
+        public const uint LIST_MODULES_ALL = 0x03;
+        public const uint LIST_MODULES_32BIT = 0x01;
+        public const uint LIST_MODULES_64BIT = 0x02;
+        public const uint LIST_MODULES_DEFAULT = 0x00;
+
+        [DllImport("psapi.dll")]
+        public static extern bool EnumProcessModulesEx(IntPtr hProcess,
+            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U4)] [In][Out] IntPtr[] lphModule,
+            int cb, [MarshalAs(UnmanagedType.U4)] out int lpcbNeeded, uint dwFilterFlag);
+
+        [DllImport("psapi.dll")]
+        public static extern uint GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName,
+            [In] [MarshalAs(UnmanagedType.U4)] int nSize);
+
+        public static List<PROCESS_MODULE> EnumurateProcessModules(Process process, bool only32bit)
+        {
+            // Enumerate the modules in the process. process.Modules doesn't work in wow64 processes properly.
+            List<PROCESS_MODULE> modules = new List<PROCESS_MODULE>(20);
+
+            IntPtr[] modhWnds = new IntPtr[0];
+            int lpcbNeeded = 0;
+            try
+            {
+                uint flag = LIST_MODULES_ALL;
+                if (only32bit)
+                    flag = LIST_MODULES_32BIT;
+
+                EnumProcessModulesEx(process.Handle, modhWnds, 0, out lpcbNeeded, flag);
+                modhWnds = new IntPtr[lpcbNeeded / IntPtr.Size];
+                EnumProcessModulesEx(process.Handle, modhWnds, modhWnds.Length * IntPtr.Size, out lpcbNeeded, flag);
+            }
+            catch (EntryPointNotFoundException)
+            {
+                // EnumProcessModulesEx doesn't exist on 32bit windows
+                foreach (System.Diagnostics.ProcessModule module in process.Modules)
+                    modules.Add(new PROCESS_MODULE(System.IO.Path.GetFileName(module.FileName), module.FileName, (Int64)module.BaseAddress));
+
+                return modules;
+            }
+
+            for (int i = 0; i < modhWnds.Length; i++)
+            {
+                StringBuilder modName = new StringBuilder(256);
+                if (GetModuleFileNameEx(process.Handle, modhWnds[i], modName, modName.Capacity) != 0)
+                    modules.Add( new PROCESS_MODULE( System.IO.Path.GetFileName(modName.ToString()), modName.ToString(), (Int64) modhWnds[i] ) );
+            }
+
+            return modules;
+        }
 
 
 
@@ -303,7 +366,11 @@ namespace MeddleFramework
 
             for (int i = 0; i < data.Length; i++)
             {
-                result += data[i].ToString("X");
+                string chunk = data[i].ToString("X");
+                while (chunk.Length < 2)
+                    chunk = "0" + chunk;
+
+                result += chunk + " ";
             }
 
             return result.TrimEnd();
@@ -442,10 +509,19 @@ namespace MeddleFramework
             // Reads a string from the specified address.
             string result = "";
             bool moreString = true;
-            int chunkSize = 0x100;
+            int chunkSize = 0x4;
             while (moreString)
             {
-                byte[] data = ReadMemory(process, (long)address, (uint)chunkSize);
+                byte[] data;
+                try
+                {
+                    data = ReadMemory(process, (long)address, (uint)chunkSize);
+                }
+                catch (Exception ex)
+                {
+                    data = new byte[0];
+                }
+
                 if (data.Length == 0)
                     return result;
                 int i = 0;
@@ -467,6 +543,9 @@ namespace MeddleFramework
                         i += 2;
                 }
                 address += (ulong)i;
+
+                // Increase chunksize
+                chunkSize *= 2;
             }
             return result;
         }
@@ -505,27 +584,12 @@ namespace MeddleFramework
             int numRead = 0;
             bool result = ReadProcessMemory(process.Handle, address, buffer, (int)length, out numRead);
 
-            if (!result && GetLastError() != 299) // ERROR_PARTIAL_COPY
+            if (!result || numRead != length)
             {
-                //Console.WriteLine("GetLastError = " + GetLastError().ToString()); //998
-                return new byte[0];
+                int lastError = Marshal.GetLastWin32Error();
+                throw new Exception("Failed to read memory from address " + address.ToString("X") + ". Read " + numRead.ToString() + " of " + length.ToString() + ". Last error: " + lastError.ToString());
             }
-
-            // Check that all the data was read correctly
-            //if ((UInt32)numRead != length)
-            //    Console.WriteLine("Failed to read memory from address " + address.ToString("X") + ". Read " + numRead.ToString() + " of " + length.ToString() + ".")
-            if ((UInt32)numRead != length)
-            {
-                byte[] newBuffer = new byte[numRead];
-                if (newBuffer.Length > 0)
-                {
-                    Array.ConstrainedCopy(buffer, 0, newBuffer, 0, newBuffer.Length);
-                }
-                return newBuffer;
-            }
-
-
-
+            
             return buffer;
         }
 
@@ -566,10 +630,10 @@ namespace MeddleFramework
             // Copy the bytes from this heap
             byte[] buffer = new byte[4];
             int numRead = 0;
-            ReadProcessMemory(process.Handle, (IntPtr)address, buffer, 4, out numRead);
+            bool result = ReadProcessMemory(process.Handle, (IntPtr)address, buffer, 4, out numRead);
 
             // Check that all the data was read correctly
-            if ((UInt32)numRead != 4)
+            if ((UInt32)numRead != 4 || !result)
             {
                 // Retry once incase we caused a page guard stack growth
                 MEMORY_BASIC_INFORMATION mbi = new MEMORY_BASIC_INFORMATION();

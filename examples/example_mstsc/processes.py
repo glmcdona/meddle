@@ -8,7 +8,7 @@ class ProcessRdp(ProcessBase):
 		self.command_line = bytes("mstsc.exe /v:%s" % server,'utf-8')
 		
 		# Initialize
-		self.initialize(Controller, self.__class__.__name__, crashdump_folder, breakpoint_handler, pid, unique_identifier, verbose)
+		self.initialize(Controller, self.__class__.__name__, crashdump_folder, breakpoint_handler, pid, -1, unique_identifier, verbose)
 		
 	def on_debugger_attached(self, Engine):
 		# Set the types
@@ -16,8 +16,9 @@ class ProcessRdp(ProcessBase):
 		self.types = meddle_types(Engine)
 		
 		# Add the targets
-		#Engine.AddTarget(Target_RDP_RC4)
-		Engine.AddTarget(Target_Winsock_Send)
+		Engine.AddTarget(Target_RDP_RC4)
+		#Engine.AddTarget(Target_Winsock_Send)
+		#Engine.AddTarget(Target_PrintSymbols)
 		
 		# Handle process loaded
 		Engine.HandleProcessLoaded()

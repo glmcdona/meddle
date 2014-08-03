@@ -90,7 +90,7 @@ class Target_DeviceIoControl(TargetBase):
 			[reg_spec, stack_spec] = self.ProcessBase.types.winapi( parameters )
 			arguments = self.Engine.ParseArguments(stack_spec, reg_spec, context)	
 			
-			name = "Driver unknown"
+			name = "device unknown"
 			if arguments.FileHandle.ToInt() in self.ProcessBase.handles:
 				name = self.ProcessBase.handles[arguments.FileHandle.ToInt()]
 			
@@ -123,7 +123,7 @@ class Target_DeviceIoControl(TargetBase):
 				arguments = self.buffers[str(th)]
 				del self.buffers[str(th)]
 
-				name = "Driver unknown"
+				name = "device unknown"
 				if arguments.FileHandle.ToInt() in self.ProcessBase.handles:
 					name = self.ProcessBase.handles[arguments.FileHandle.ToInt()]
 

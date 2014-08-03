@@ -80,7 +80,15 @@ namespace Meddle
             }
 
             // Read the data
-            Data = MemoryFunctions.ReadMemory(process.ProcessDotNet, address, (uint)Size);
+            try
+            {
+                Data = MemoryFunctions.ReadMemory(process.ProcessDotNet, address, (uint)Size);
+            }
+            catch (Exception e)
+            {
+                Data = null;
+            }
+
 
             PointerTarget = null;
         }
@@ -89,7 +97,7 @@ namespace Meddle
         {
             // Load the pointer target
             PointerTarget = null;
-            if (_argumentType != null)
+            if (_argumentType != null && Data != null)
             {
                 long targetAddress = 0;
                 if (Size == 4 || Size == 8)
@@ -112,14 +120,17 @@ namespace Meddle
 
         public void Reparse(byte[] data, long offset)
         {
-            // Copy the data
-            Array.ConstrainedCopy(data, (int)offset, Data, 0, (int)Size);
-            if (PointerTarget != null)
+            if (Data != null)
             {
-                if (Size == 4)
-                    PointerTarget.Reparse(MemoryFunctions.ByteArrayToUint(Data, 0));
-                else if (Size == 8)
-                    PointerTarget.Reparse((long)MemoryFunctions.ByteArrayToUlong(Data, 0));
+                // Copy the data
+                Array.ConstrainedCopy(data, (int)offset, Data, 0, (int)Size);
+                if (PointerTarget != null)
+                {
+                    if (Size == 4)
+                        PointerTarget.Reparse(MemoryFunctions.ByteArrayToUint(Data, 0));
+                    else if (Size == 8)
+                        PointerTarget.Reparse((long)MemoryFunctions.ByteArrayToUlong(Data, 0));
+                }
             }
         }
 
@@ -188,22 +199,82 @@ namespace Meddle
         public int ToInt()
         {
             // Return the data an int
-            return (int)MemoryFunctions.ByteArrayToUint(Data, 0);
+            if (Data != null)
+            {
+                return (int)MemoryFunctions.ByteArrayToUint(Data, 0);
+            }
+            else
+            {
+                throw new Exception("Error. Argument is null and cannot be accessed.");
+            }
         }
 
         public long ToLong()
         {
             // Return the data a long
-            return (long)MemoryFunctions.ByteArrayToUlong(Data, 0);
+            if (Data != null)
+            {
+                return (long)MemoryFunctions.ByteArrayToUlong(Data, 0);
+            }
+            else
+            {
+                throw new Exception("Error. Argument is null and cannot be accessed.");
+            }
+        }
+
+        public virtual void SetLong(long value, Context context)
+        {
+            // Set the underlying element to the specified value
+            if (this.GetProcess().IsWin64)
+            {
+                MemoryFunctions.WriteMemory(this.GetProcess().ProcessDotNet, (IntPtr)Address, value);
+            }
+            else
+            {
+                MemoryFunctions.WriteMemory(this.GetProcess().ProcessDotNet, (IntPtr)Address, (Int32) value);
+            }
+
+            // Read the data again
+            try
+            {
+                Data = MemoryFunctions.ReadMemory(process.ProcessDotNet, Address, (uint)Size);
+            }
+            catch (Exception e)
+            {
+                Data = null;
+            }
+        }
+
+        public virtual void SetDword(Int32 value, Context context)
+        {
+            // Set the underlying element to the specified value
+            MemoryFunctions.WriteMemory(this.GetProcess().ProcessDotNet, (IntPtr)Address, (Int32) value);
+
+            // Read the data again
+            try
+            {
+                Data = MemoryFunctions.ReadMemory(process.ProcessDotNet, Address, (uint)Size);
+            }
+            catch (Exception e)
+            {
+                Data = null;
+            }
         }
 
         public long ToPtr()
         {
             // Return the data a IntPtr
-            if (process.IsWin64)
-                return this.ToLong();
+            if (Data != null)
+            {
+                if (process.IsWin64)
+                    return this.ToLong();
+                else
+                    return (long)this.ToInt();
+            }
             else
-                return (long)this.ToInt();
+            {
+                throw new Exception("Error. Argument is null and cannot be accessed.");
+            }
         }
 
         public byte[] ToBytes()
@@ -219,31 +290,65 @@ namespace Meddle
 
         public override string ToString()
         {
-            if (PointerTarget != null)
+            if( Data == null )
+                return string.Format("{2}{0} at {1}:\nnull", Name, this.GetLocation(), NamePrefix);
+            else
             {
-                // Pass the request on to the pointed to Arguments struct
-                return string.Format("{4}{0} at {3}:\n{1}\n{2}", Name, MemoryFunctions.Hexlify(Data, 16, true), PointerTarget.ToString(), this.GetLocation(), NamePrefix);
+                if (PointerTarget != null)
+                {
+                    // Pass the request on to the pointed to Arguments struct
+                    return string.Format("{4}{0} at {3}:\n{1}\n{2}", Name, MemoryFunctions.Hexlify(Data, 16, true), PointerTarget.ToString(), this.GetLocation(), NamePrefix);
+                }
+                return string.Format("{3}{0} at {2}:\n{1}", Name, MemoryFunctions.Hexlify(Data, 16, true), this.GetLocation(), NamePrefix);
             }
-            return string.Format("{3}{0} at {2}:\n{1}", Name, MemoryFunctions.Hexlify(Data, 16, true), this.GetLocation(), NamePrefix);
+        }
+
+        public bool IsNull()
+        {
+            return Data == null;    
         }
 
         public string ToBase64()
         {
-            return MemoryFunctions.ToBase64(Data);
+            if (Data != null)
+            {
+                return MemoryFunctions.ToBase64(Data);
+            }
+            else
+            {
+                throw new Exception("Error. Argument is null and cannot be accessed.");
+            }
         }
 
         public string ToAscii()
         {
-            return MemoryFunctions.ToAscii(Data);
+            if (Data != null)
+            {
+                return MemoryFunctions.ToAscii(Data);
+            }
+            else
+            {
+                throw new Exception("Error. Argument is null and cannot be accessed.");
+            }
         }
 
         public string ToHex()
         {
-            return MemoryFunctions.ToHex(Data);
+            if (Data != null)
+            {
+                return MemoryFunctions.ToHex(Data);
+            }
+            else
+            {
+                throw new Exception("Error. Argument is null and cannot be accessed.");
+            }
         }
 
         public string ToString(string overrideName)
         {
+            if( Data == null )
+                return string.Format("{2}{0} at {1}:\nnull", overrideName, this.GetLocation(), "");
+
             if (PointerTarget != null)
             {
                 // Pass the request on to the pointed to Arguments struct

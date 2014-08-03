@@ -2,12 +2,11 @@ from process_base import *
 from targets import *
 
 
-class ProcessDeviceIo(ProcessBase):
-	def __init__(self, Controller, crashdump_folder, breakpoint_handler, pid, ph, unique_identifier, verbose, logger):
+class ProcessTrace(ProcessBase):
+	def __init__(self, path_to_exe, command_line, Controller, crashdump_folder, breakpoint_handler, pid, ph, unique_identifier, verbose):
 		# Specific options
-		self.path_to_exe = b"C:\\Windows\\System32\\notepad.exe"
-		self.command_line = b"notepad.exe"
-		self.logger = logger
+		self.path_to_exe = bytes(path_to_exe,'utf-8')
+		self.command_line = bytes(command_line,'utf-8')
 		
 		# Initialize
 		self.initialize(Controller, self.__class__.__name__, crashdump_folder, breakpoint_handler, pid, ph, unique_identifier, verbose)
@@ -19,8 +18,8 @@ class ProcessDeviceIo(ProcessBase):
 		
 		# Add the targets
 		#Engine.AddTarget(Target_RDP_RC4)
-		Engine.AddTarget(Target_Handles)
-		Engine.AddTarget(Target_DeviceIoControl)
+		#Engine.AddTarget(Target_Handles)
+		Engine.AddTarget(Target_PrintExports)
 		
 		# Handle process loaded
 		Engine.HandleProcessLoaded()

@@ -102,9 +102,18 @@ namespace Meddle
             return this._name;
         }
 
+        public string GetProcessName()
+        {
+            return this.ProcessDotNet.ProcessName;
+        }
+
 
         ~Process()
         {
+            // Remove breakpoints
+            if (_debugger != null)
+                _debugger.RemoveBreakpoints();
+
         }
 
         public void Detach()
@@ -112,6 +121,12 @@ namespace Meddle
             // Detach the debugger and don't terminate the process.
             if (_debugger != null)
                 _debugger.Detach();
+        }
+
+        public void SetKeepOnExit()
+        {
+            if (_debugger != null)
+                _debugger.SetKeepOnExit();
         }
 
         public void HandleProcessLoaded()
@@ -391,12 +406,13 @@ namespace Meddle
         public string[] GetExportedFunctions(string library)
         {
             // Find the module
-            foreach (System.Diagnostics.ProcessModule module in ProcessDotNet.Modules)
+            List<MemoryFunctions.PROCESS_MODULE> modules = MemoryFunctions.EnumurateProcessModules(ProcessDotNet, !IsWin64);
+            foreach (MemoryFunctions.PROCESS_MODULE module in modules)
             {
-                if (module.ModuleName.ToLower() == library.ToLower())
+                if (module.Name.ToLower() == library.ToLower())
                 {
                     // Found the module, parse it's pe header in-memory
-                    HeaderReader header = new HeaderReader(ProcessDotNet, (ulong)module.BaseAddress);
+                    HeaderReader header = new HeaderReader(ProcessDotNet, (UInt64) module.BaseAddress);
 
                     List<string> result = new List<string>(header.exports.Count);
                     foreach (export function in header.exports.Values)
@@ -412,19 +428,33 @@ namespace Meddle
 
         public string[] GetLoadedModules()
         {
+            List<MemoryFunctions.PROCESS_MODULE> modules = MemoryFunctions.EnumurateProcessModules(ProcessDotNet, !IsWin64);
+            List<string> modulePaths = new List<string>(modules.Count);
+
+            foreach (MemoryFunctions.PROCESS_MODULE module in modules)
+            {
+                modulePaths.Add(module.FullPath);
+            }
+
+            return modulePaths.ToArray();
+
+            // This algorithm doesn't work for WOW64 processes - it only enumerates the 64 bit modules in WOW64 processses.
+            /*
             List<string> modules = new List<string>(ProcessDotNet.Modules.Count);
 
             foreach( System.Diagnostics.ProcessModule module in ProcessDotNet.Modules)
                 modules.Add( module.FileName );
             
             return modules.ToArray();
+             * */
         }
 
-        public Int64 GetModulesBase(string library)
+        public Int64 GetModuleBase(string library)
         {
-            foreach (System.Diagnostics.ProcessModule module in ProcessDotNet.Modules)
+            List<MemoryFunctions.PROCESS_MODULE> modules = MemoryFunctions.EnumurateProcessModules(ProcessDotNet, !IsWin64);
+            foreach (MemoryFunctions.PROCESS_MODULE module in modules)
             {
-                if (module.FileName.EndsWith("\\" + library, StringComparison.InvariantCultureIgnoreCase ) )
+                if (module.Name.ToLower() == library.ToLower() )
                 {
                     return (Int64) module.BaseAddress;
                 }
@@ -436,9 +466,10 @@ namespace Meddle
         public HeaderReader GetModuleHeader(string library)
         {
             // Find the module
-            foreach (System.Diagnostics.ProcessModule module in ProcessDotNet.Modules)
+            List<MemoryFunctions.PROCESS_MODULE> modules = MemoryFunctions.EnumurateProcessModules(ProcessDotNet, !IsWin64);
+            foreach (MemoryFunctions.PROCESS_MODULE module in modules)
             {
-                if (module.ModuleName.ToLower() == library.ToLower())
+                if (module.Name.ToLower() == library.ToLower())
                 {
                     // Found the module, parse it's pe header in-memory
                     HeaderReader header = new HeaderReader(ProcessDotNet, (ulong)module.BaseAddress);
@@ -452,11 +483,13 @@ namespace Meddle
         public List<UInt64> MemoryFindAll(string library, List pattern)
         {
             // Find the module
-            foreach (System.Diagnostics.ProcessModule module in ProcessDotNet.Modules)
+            List<MemoryFunctions.PROCESS_MODULE> modules = MemoryFunctions.EnumurateProcessModules(ProcessDotNet, !IsWin64);
+            foreach (MemoryFunctions.PROCESS_MODULE module in modules)
             {
-                if (module.ModuleName.ToLower() == library.ToLower())
+                if (module.Name.ToLower() == library.ToLower())
                 {
-                    return MemoryFunctions.MemoryFindAll(ProcessDotNet, module.BaseAddress, (uint)module.ModuleMemorySize, pattern.ToArray<object>());
+                    HeaderReader header = new HeaderReader(ProcessDotNet, (UInt64) module.BaseAddress);
+                    return MemoryFunctions.MemoryFindAll(ProcessDotNet, (IntPtr) module.BaseAddress, header.optHeader.SizeOfImage, pattern.ToArray<object>());
                 }
             }
 
@@ -486,9 +519,11 @@ namespace Meddle
         public UInt64[] GetProcedureAddresses(string library, object procedures)
         {
             // Find the module
-            foreach (System.Diagnostics.ProcessModule module in ProcessDotNet.Modules)
+
+            List<MemoryFunctions.PROCESS_MODULE> modules = MemoryFunctions.EnumurateProcessModules(ProcessDotNet, !IsWin64);
+            foreach (MemoryFunctions.PROCESS_MODULE module in modules)
             {
-                if (module.ModuleName.ToLower() == library.ToLower())
+                if (module.Name.ToLower() == library.ToLower())
                 {
                     // Found the module, parse it's pe header in-memory
                     HeaderReader header = new HeaderReader(ProcessDotNet, (ulong)module.BaseAddress);
@@ -580,9 +615,10 @@ namespace Meddle
             try
             {
                 // Find the module
-                foreach (System.Diagnostics.ProcessModule module in ProcessDotNet.Modules)
+                List<MemoryFunctions.PROCESS_MODULE> modules = MemoryFunctions.EnumurateProcessModules(ProcessDotNet, !IsWin64);
+                foreach (MemoryFunctions.PROCESS_MODULE module in modules)
                 {
-                    if (module.ModuleName.ToLower() == library.ToLower())
+                    if (module.Name.ToLower() == library.ToLower())
                     {
                         // Found the module, parse it's pe header in-memory
                         return new HeaderReader(ProcessDotNet, (ulong)module.BaseAddress);

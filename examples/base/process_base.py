@@ -79,7 +79,7 @@ class ProcessBase:
 		except:
 			pass
 		
-	def initialize(self, Controller, process_name, crashdump_folder, breakpoint_handler, pid, unique_identifier, verbose):
+	def initialize(self, Controller, process_name, crashdump_folder, breakpoint_handler, pid, ph, unique_identifier, verbose):
 		# General initialize
 		self.unique_identifier = unique_identifier
 		self.nokill = False
@@ -106,9 +106,11 @@ class ProcessBase:
 		# Attach or start the process
 		if pid != -1:
 			# Attach to existing process
-			self.pid = process_information.dwProcessId
+			print "attaching to existing process"
+			self.pid = int(pid)
 			self.start_th = -1
-			self.ph = windll.kernel32.OpenProcess(2035711,True,self.pid)
+			#self.ph = windll.kernel32.OpenProcess(2035711,True,self.pid)
+			self.ph = ph
 		else:
 			# Start and attach to new process, throws exception on fail
 			self.start_new_process(self.path_to_exe, self.command_line)		
@@ -118,6 +120,11 @@ class ProcessBase:
 		self.log(self.breakpoint_handler.to_string())
 	
 	
+	def get_handle_name(self, hwnd):
+		# Lookup the handle name
+		pass
+
+
 	def start_new_process(self, path_to_exe, commandline):
 		# Create a new process and attach to it.
 	
@@ -223,9 +230,14 @@ class ProcessBase:
 		self.on_process_terminated()
 	
 	def on_debugger_attached(self):
+		pass
+
+	def on_handle_first_bp(self):
 		# Resume the process that we created suspended. This is called just after the debugger has been attached.
 		if self.start_th >= 0:
-			windll.kernel32.ResumeThread(self.start_th);
+			print "resume 0x%x" % self.start_th
+			if not windll.kernel32.ResumeThread(self.start_th):
+				print "Failed to ResumeThread instance of '%s'. GetLastError = 0x%x." % (self.process_name, windll.kernel32.GetLastError())
 
 	def handle_process_loaded(self):
 		# This is called after the process image has first been loaded. This is triggered on the next
@@ -238,3 +250,31 @@ class ProcessBase:
 		pass
 		#print self.Engine.GetExportedFunctions("ntdll.dll")
 	
+
+
+class ProcessFork(ProcessBase):
+	def __init__(self, Controller, breakpoint_handler, path_to_exe, command_line, pid, ph, th, resume_th):
+		# Specific options
+		self.path_to_exe = bytes(path_to_exe,'utf-8')
+		self.command_line = bytes(command_line,'utf-8')
+		
+		# Initialize
+		self.initialize(Controller, self.__class__.__name__, "", breakpoint_handler, pid, ph, 0, False)
+
+		# Resume thread upon attach
+		if resume_th:
+			self.start_th = th
+		
+	def on_debugger_attached(self, Engine):
+		# Set the types
+		self.Engine = Engine
+		self.types = meddle_types(Engine)
+
+		# Keep the process on exiting meddle
+		Engine.SetKeepOnExit()
+		
+		# Add the targets
+		Engine.AddTarget(Target_Fork)
+		
+		# Handle process loaded
+		Engine.HandleProcessLoaded()

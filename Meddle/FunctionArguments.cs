@@ -59,6 +59,16 @@ namespace Meddle
         {
             return Register;
         }
+
+        public override void SetLong(long value, Context context)
+        {
+            context.SetMember(Register, value);
+        }
+
+        public override void SetDword(Int32 value, Context context)
+        {
+            context.SetMember(Register, value);
+        }
         
         public override void GetFuzzBlockDescriptions(ref HashSet<FuzzBlock> blocks, int chunkSize)
         {

@@ -22,18 +22,27 @@ import capture
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-THREAD_GET_CONTEXT = 0x0008
-THREAD_QUERY_INFORMATION = 0x0040
-THREAD_SET_CONTEXT = 0x0010
-THREAD_SET_INFORMATION = 0x0020
-THREAD_SUSPEND_RESUME = 0x0002
-
 # Create one instance of notepad attacking driver messages
 class Controller:
 	last_fault = None
 	
 	def system_new_process(self, name, pid, ph):
-		pass
+		mBreakpoint = BreakpointEmpty()
+		mProcess = ProcessDeviceIo(self, "C:\\Crash\\", mBreakpoint, pid, ph, 0, False, self.logger, False, -1 )
+		self.CEngine.AttachProcess(mProcess)
+
+
+	def attach_new_process(self, name, pid, ph):
+		return
+		# Attach to this process
+		print "attaching to %s" % name
+		mBreakpoint = BreakpointMeasurement()
+		mProcess = ProcessFork(self, mBreakpoint, "", "", pid, ph, -1, False )
+
+		try:
+			self.CEngine.AttachProcess(mProcess)
+		except:
+			print "Failed to attach to %s" % name
 
 	def __init__(self, CEngine):
 		self.CEngine = CEngine
@@ -42,36 +51,21 @@ class Controller:
 	def main(self, args):
 		# Set working directory to controller directory
 		os.chdir(os.path.join(os.path.dirname(__file__), ".."))
-
+		
 		try:
-			self.printOnly = False
-			self.instrumentFile = ""
+			self.logger = capture.capture("capture.log",["timestamp","type","process_name","pid","device_name", "device_h", "data_base64"])
 
-			for arg in args:
-				if str(arg) == "-printonly":
-					self.printOnly = True
-				else:
-					self.instrumentFile = arg
+			# Attach to all processes
+			processes = self.CEngine.GetAllProcesses()
+			for process in processes:
+				# Attach
+				self.attach_new_process(process.ProcessName, process.Id, process.Handle)
 
-			# Select a random seed
-			seed = int(random.random()*1000000)
-			self.generator = random.Random()
-			self.generator.seed(seed)
-			print "Controller is using seed value of %i. Set this value manually to reproduce this attack." % seed
-			
-			# Perform an initial measurement to gather data for an organized attack
-			self.logger = capture.sandbox_logfile(".","events")
-			mBreakpoint = BreakpointEmpty()
-			mProcess = ProcessSandbox(self, "C:\\Crash\\", mBreakpoint, -1, 0, self.printOnly, self.logger, self.instrumentFile, self.instrumentFile, None, False, None )
-			self.CEngine.AttachProcess(mProcess)
-			
-			sleep(10000)
-			mProcess.stop()
-
+			return
 		except Exception,e:
 			logging.exception("Controller main loop unhandled exception.")
     		raise	
-
+	
 	def process_fork(self, new_pid, new_tid, new_ph, suspend_switched):
 		mBreakpoint = BreakpointEmpty()
 		new_th = windll.kernel32.OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_SUSPEND_RESUME,
@@ -81,6 +75,5 @@ class Controller:
 			# failed
 			print "Failed to OpenThread to resume thread on process fork. Last error = %i." % windll.kernel32.GetLastError()
 		else:
-			mProcess = ProcessSandbox(self, "C:\\Crash\\", mBreakpoint, new_pid, 0, self.printOnly, self.logger, self.instrumentFile, self.instrumentFile, new_th, suspend_switched, new_ph )
+			mProcess = ProcessDeviceIo(self, "C:\\Crash\\", mBreakpoint, new_pid, new_ph, 0, False, self.logger, suspend_switched, new_th )
 			self.CEngine.AttachProcess(mProcess)
-	

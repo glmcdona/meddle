@@ -211,10 +211,10 @@ namespace Microsoft.Samples.Debugging.Native
         /// </summary>
         /// <param name="nativeEvent">event</param>
         /// <remarks>Loader breakpoint is generally the first breakpoint event</remarks>
-        public void HandleIfLoaderBreakpoint(NativeEvent nativeEvent)
+        public void HandleIfLoaderBreakpoint(NativeEvent nativeEvent, ref bool loaderBreakpointReceived)
         {
             // If it's already handled, nothing left to do
-            if (m_fLoaderBreakpointReceived)
+            if (loaderBreakpointReceived)
             {
                 return;
             }
@@ -236,7 +236,9 @@ namespace Microsoft.Samples.Debugging.Native
             }
 
             e.ContinueStatus = NativeMethods.ContinueStatus.DBG_CONTINUE;
-            m_fLoaderBreakpointReceived = true;
+            loaderBreakpointReceived = true;
+
+            return;
         }
         bool m_fLoaderBreakpointReceived;
 

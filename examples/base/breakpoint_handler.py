@@ -16,6 +16,16 @@ class BreakpointMeasurement:
 	def to_string(self):
 		return "Breakpoint Handler: %s\r\n" % self.__class__.__name__
 
+class BreakpointEmpty:
+	def __init__(self):
+		pass
+		
+	def breakpoint_hit(self, parent, target, event_name, address, context, th):
+		target.breakpoint_hit(event_name, address, context, th)
+	
+	def to_string(self):
+		return "Breakpoint Handler: %s\r\n" % self.__class__.__name__
+
 class BreakpointAttackSequentially:
 	def __init__(self, percent_to_attack, events_num_skip, fuzz_name_filter, seed):
 		self.percent_to_attack = percent_to_attack

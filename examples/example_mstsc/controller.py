@@ -37,6 +37,9 @@ class Controller:
 		pass
 	
 	def main(self, args):
+		# Set working directory to controller directory
+		os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+		
 		try:
 			printOnly = False
 			server = "192.168.110.2"
@@ -116,7 +119,7 @@ class Controller:
 			fault_pause = 180
 			self.last_fault = time.time()-120000
 			max_runtime = 5
-			num_processes = 10
+			num_processes = 20
 			unique_identifier = 1
 
 			event_positions = {}

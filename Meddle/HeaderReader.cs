@@ -302,7 +302,7 @@ namespace MeddleFramework
             {
                 // Read in the optHeader
                 byte[] optHeader_rawData = MemoryFunctions.ReadMemory(process, (IntPtr)(PE_header + 4 + (uint)Marshal.SizeOf(typeof(COFFHeader))), coffHeader.SizeOfOptionalHeader);
-                PEOptHeader optHeader = new PEOptHeader(ref optHeader_rawData, 0, coffHeader.SizeOfOptionalHeader);
+                optHeader = new PEOptHeader(ref optHeader_rawData, 0, coffHeader.SizeOfOptionalHeader);
 
                 // Confirm that it loaded correctly
                 if ((optHeader.signature & 0xffff) != 0x10b && (optHeader.signature & 0xffff) != 0x20b)

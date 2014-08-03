@@ -25,8 +25,6 @@ namespace Meddle
         {
             _process = process;
             _address = address;
-            if (address == (IntPtr)0x77b98ec0)
-                Console.WriteLine("TEST");
             _targets = new List<Target>(1);
             Names = new List<string>(1);
             _targets.Add(target);

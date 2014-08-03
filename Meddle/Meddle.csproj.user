@@ -7,7 +7,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <StartWorkingDirectory>
     </StartWorkingDirectory>
-    <StartArguments>.\..\..\..\examples\example_mstsc\controller.py</StartArguments>
+    <StartArguments>.\..\..\..\examples\example_sandbox\controller.py -printonly "C:\windows\system32\notepad.exe"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <StartWorkingDirectory>C:\Users\glmcdona\Documents\Visual Studio 2012\Projects\Meddle\scripts\pymeddle_deviceiocontrol\</StartWorkingDirectory>

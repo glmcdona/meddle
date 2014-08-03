@@ -86,12 +86,10 @@ class meddle_types():
 			regspec = []
 			
 			# Return address
-			stackspec = [[self.size_ptr() , None, NOFUZZ, "returnAddress", None]]
-				
+			stackspec = [{"name":"returnAddress", "size":self.size_ptr(), "type":None, "fuzz":NOFUZZ}]
+			
 			# Stack arguments
-			for i in range(len(arg_specs)):
-				arg = arg_specs[i]
-				#stackspec.insert(1,arg);
+			for arg in arg_specs:
 				stackspec += [arg];
 			
 			return [regspec, stackspec]
@@ -158,8 +156,13 @@ class meddle_types():
 			
 		else:
 			# All stack arguments by 32bit convention
+
+			# Return address
+			stackspec = [{"name":"returnAddress", "size":self.size_ptr(), "type":None, "fuzz":NOFUZZ}]
 			regspec = []
-			stackspec += arg_specs
+
+			for arg in (arg_specs):
+				stackspec.append(arg);
 			
 		return [regspec, stackspec]
 
@@ -285,16 +288,31 @@ class meddle_types():
 		#  USHORT MaximumLength;
 		#  PWSTR  Buffer;
 		#} UNICODE_STRING, *PUNICODE_STRING;
+		if self.Engine.IsWin64:
+			return [ {"name": extra_name + "Length",
+					  "size": self.size_short(),
+					  "type": None,
+					  "fuzz": FUZZ },
+					  {"name": extra_name + "MaximumLength",
+					  "size": self.size_short(),
+					  "type": None,
+					  "fuzz": FUZZ },
+					  {"name": extra_name + "_padding",
+					  "size": 4,
+					  "type": None,
+					  "fuzz": FUZZ },
+					  {"name": extra_name + "Buffer",
+					  "size": self.size_ptr(),
+					  "type": None,
+					  "fuzz": FUZZ } ]
+
+		# No padding on 32bit
 		return [ {"name": extra_name + "Length",
 				  "size": self.size_short(),
 				  "type": None,
 				  "fuzz": FUZZ },
 				  {"name": extra_name + "MaximumLength",
 				  "size": self.size_short(),
-				  "type": None,
-				  "fuzz": FUZZ },
-				  {"name": extra_name + "_padding",
-				  "size": 4,
 				  "type": None,
 				  "fuzz": FUZZ },
 				  {"name": extra_name + "Buffer",
@@ -329,14 +347,20 @@ class meddle_types():
   		#	u_long   len;
   		#	char FAR *buf;
 		#} WSABUF, *LPWSABUF;
-		return [ {"name": extra_name + "len" % i,
+		return [ {"name": extra_name + "len",
 				  "size": self.size_ptr(),
 				  "type": None,
 				  "fuzz": NOFUZZ },
-				 {"name": extra_name + "buf" % i,
+				 {"name": extra_name + "buf",
 				  "size": self.size_ptr(),
 				  "type": parse_BUFFER,
 				  "type_args": "len",
+				  "fuzz": NOFUZZ } ]
+
+	def parse_DWORD(self, parent_arg, address, extra_name, type_args):
+		return [ {"name": extra_name + "dword",
+				  "size": 4,
+				  "type": None,
 				  "fuzz": NOFUZZ } ]
 
 	def parse_BUFFER_PTR(self, parent_arg, address, extra_name, type_args):
@@ -376,5 +400,29 @@ class meddle_types():
 				  "size": self.size_ptr(),
 				  "type": self.parse_BUFFER,
 				  "type_args": type_args,
+				  "fuzz": FUZZ } ]
+
+	def parse_PROCESS_INFORMATION(self, parent_arg, address, extra_name, type_args):
+		#typedef struct _PROCESS_INFORMATION {
+		#    HANDLE hProcess;
+		#    HANDLE hThread;
+		#    DWORD dwProcessId;
+		#    DWORD dwThreadId;
+		#} PROCESS_INFORMATION, *PPROCESS_INFORMATION, *LPPROCESS_INFORMATION;
+		return [ {"name": extra_name + "hProcess",
+				  "size": self.size_long(),
+				  "type": None,
+				  "fuzz": FUZZ },
+				  {"name": extra_name + "hThread",
+				  "size": self.size_long(),
+				  "type": None,
+				  "fuzz": FUZZ },
+				  {"name": extra_name + "dwProcessId",
+				  "size": 4,
+				  "type": None,
+				  "fuzz": FUZZ },
+				  {"name": extra_name + "dwThreadId",
+				  "size": 4,
+				  "type": None,
 				  "fuzz": FUZZ } ]
 	

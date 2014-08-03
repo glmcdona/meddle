@@ -18,7 +18,6 @@ namespace Meddle
         private bool _running = true;
 
         private HashSet<int> _lastProcesses = null;
-        private Thread _dispatchLoadedProcesses = null;
 
         public bool Begin()
         {
@@ -86,9 +85,10 @@ namespace Meddle
                 var pyTypeController = _pyBoss.PyScope.GetVariable("Controller");
                 PyController = _pyBoss.PyEngine.Operations.CreateInstance(pyTypeController, this);
 
-                // Create the new process dispatcher check loop
-                _dispatchLoadedProcesses = new Thread(NewProcessMonitor);
-                _dispatchLoadedProcesses.Start();
+                // Create the new process dispatcher check
+                ProcessWatcher procWatcher = new ProcessWatcher();
+                procWatcher.ProcessCreated += new ProcessEventHandler(procWatcher_ProcessCreated);
+                procWatcher.Start();
 
                 // Execute the controller main function
                 try
@@ -114,6 +114,19 @@ namespace Meddle
             Initialized = true;
         }
 
+        private void procWatcher_ProcessCreated(WMI.Win32.Process proc)
+        {
+            try
+            {
+                PyController.system_new_process(proc.Name, proc.ProcessId, System.Diagnostics.Process.GetProcessById((int)proc.ProcessId).Handle);
+            }
+            catch
+            {
+                // Ignore
+            }
+
+        }
+
         public bool AttachProcess(dynamic pyProcess)
         {
             try
@@ -128,6 +141,11 @@ namespace Meddle
                 Console.WriteLine(e);
             }
             return false;
+        }
+
+        public System.Diagnostics.Process[] GetAllProcesses()
+        {
+            return System.Diagnostics.Process.GetProcesses();
         }
     }
 

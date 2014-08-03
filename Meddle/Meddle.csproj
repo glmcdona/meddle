@@ -125,6 +125,7 @@
     <Reference Include="System.Core">
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Management" />
     <Reference Include="System.Numerics">
       <Private>True</Private>
     </Reference>
@@ -166,6 +167,12 @@
     <Compile Include="HeaderReader.cs" />
     <Compile Include="MemoryFunctions.cs" />
     <Compile Include="Process.cs" />
+    <Compile Include="ProcessMonitor\Process.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ProcessMonitor\ProcessWatcher.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

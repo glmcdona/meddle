@@ -33,6 +33,7 @@ namespace Meddle
         private Hashtable _breakpoints = null;
         private Hashtable _breakpointInfo = null;
         private bool _attached = false;
+        private bool _keepOnExit = false;
 
 
         public Debugger(int pid, Process process)
@@ -131,19 +132,17 @@ namespace Meddle
             }
         }
 
-
-        bool handled_WX86_BREAKPOINT = false;
-
-        public void HandleNativeDebugEvent(ExceptionNativeEvent em, ref Hashtable numEventsByTarget)
+        List<IntPtr> suspended;
+        public void HandleNativeDebugEvent(ExceptionNativeEvent em, ref Hashtable numEventsByTarget, ref bool wx86BreakpointReceived)
         {
             switch (em.ExceptionCode)
             {
                 case ExceptionCode.STATUS_WX86_BREAKPOINT:
                 case ExceptionCode.STATUS_BREAKPOINT:
-                    if (em.ExceptionCode == ExceptionCode.STATUS_WX86_BREAKPOINT && !handled_WX86_BREAKPOINT )
+                    if (em.ExceptionCode == ExceptionCode.STATUS_WX86_BREAKPOINT && !wx86BreakpointReceived)
                     {
                         Console.WriteLine(string.Format("WOW64 load breakpoint event."));
-                        handled_WX86_BREAKPOINT = true;
+                        wx86BreakpointReceived = true;
                         em.ClearException();
                     }
 
@@ -152,6 +151,9 @@ namespace Meddle
                         // Get the thread context
                         IntPtr hThread = NativeMethods.OpenThread(ThreadAccess.THREAD_ALL_ACCESS, true, (uint)em.ThreadId);
                         Context context = new Context(_process, hThread);
+
+                        // Suspend all threads
+                        //suspended = SuspendAllThreads((int)em.ThreadId);
 
                         // Save the thread context with the threadId to use it in the EXCEPTION_SINGLE_STEP handler.
                         if (_breakpointInfo.Contains((uint)em.ThreadId))
@@ -208,12 +210,18 @@ namespace Meddle
                         // Clear the exception
                         em.ClearException();
 
+                        // Resume all threads
+                        //ResumeAllThreads(suspended);
+                        //suspended = new List<IntPtr>(0);
+
                     }
                     else
                     {
                         Console.WriteLine(string.Format("ERROR: Failed to find entry for thread id."));
                         em.ClearException();
                     }
+
+                    
                     break;
 
 
@@ -248,19 +256,44 @@ namespace Meddle
             _processingEvents = false;
 
             // Remove all breakpoints
+            RemoveBreakpoints();
+        }
+
+        public void RemoveBreakpoints()
+        {
+            // Remove all breakpoints
             foreach (Breakpoint bp in _breakpoints.Values)
             {
                 bp.ClearBreakpoint();
             }
         }
 
-        public bool HandleProcessReady()
+        public bool HandleProcessReady(bool wx86bp)
         {
             // Check if the process is ready yet
             try
             {
                 // Triggers exception if too early in load process
                 string tmp = _process.ProcessDotNet.MainModule.FileName;
+
+                // If it is WOW64, then we need to wait for the STATUS_WX86_BREAKPOINT event before stating that the debugger is attached
+                if (IntPtr.Size == 8 && !wx86bp && !_process.IsWin64)
+                {
+                    // Check to see if kernel32.dll is loaded yet
+                    string[] modules = _process.GetLoadedModules();
+                    foreach (string module in modules)
+                    {
+                        if (module.EndsWith("\\ntdll.dll", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _process.PyProcess.on_debugger_attached(_process);
+                            return true;
+                        }
+                    }
+
+                    return false; // Wait for STATUS_WX86_BREAKPOINT
+                }
+                
+
 
                 // Tell the python code that the debugger is attached
                 try
@@ -286,6 +319,17 @@ namespace Meddle
             NativeDbgProcess process = dbg.Attach(_pid);
             _attached = true;
 
+            // Tell the process it is ready to resume
+            try
+            {
+                _process.PyProcess.on_handle_first_bp();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format("ERROR: Python class 'Process' {0} failed when executing 'on_handle_first_bp()':", _process.GetName()));
+                Console.WriteLine(ex.ToString());
+                // attempt to continue anyways
+            }
             
 
             // Initialize the printing variables
@@ -294,6 +338,8 @@ namespace Meddle
             _breakpointInfo = new Hashtable(10);
             bool printReport = false;
             bool processReady = false;
+            bool loaderBreakpointReceived = false;
+            bool wx86BreakpointReceived = false;
             
             while (_processingEvents)
             {
@@ -309,23 +355,26 @@ namespace Meddle
 
                 // Check to see if the process has loaded
                 if (!processReady)
-                    processReady = HandleProcessReady();
+                    processReady = HandleProcessReady(wx86BreakpointReceived);
 
                 NativeEvent e = dbg.WaitForDebugEvent(100);
 
                 // Check to see if the process has loaded
                 if (!processReady)
-                    processReady = HandleProcessReady();
+                    processReady = HandleProcessReady(wx86BreakpointReceived);
+
+                if (_keepOnExit && dbg.KillOnExit)
+                    dbg.KillOnExit = false;
 
                 if (e != null)
                 {
                     //Console.WriteLine(e.ToString());
-                    e.Process.HandleIfLoaderBreakpoint(e);
+                    e.Process.HandleIfLoaderBreakpoint(e, ref loaderBreakpointReceived);
 
                     switch (e.EventCode)
                     {
                         case NativeDebugEventCode.EXCEPTION_DEBUG_EVENT:
-                            HandleNativeDebugEvent((ExceptionNativeEvent)e, ref numEventsByTarget);
+                            HandleNativeDebugEvent((ExceptionNativeEvent)e, ref numEventsByTarget, ref wx86BreakpointReceived);
                             break;
 
                         case NativeDebugEventCode.LOAD_DLL_DEBUG_EVENT:
@@ -333,12 +382,8 @@ namespace Meddle
                             if (_process.PyProcess.print_debugger_messages)
                                 Console.WriteLine(e.ToString());
 
-                            if (processReady)
-                            {
-                                // Notify scripts of load module
-                                _process.HandleModuleLoaded((LoadDllNativeEvent)e);
-                            }
-
+                            //Console.WriteLine(((LoadDllNativeEvent)e).Module.Name );
+                            _process.HandleModuleLoaded((LoadDllNativeEvent)e);
 
                             break;
 
@@ -365,6 +410,10 @@ namespace Meddle
             _attached = false;
         }
 
+        public void SetKeepOnExit()
+        {
+            _keepOnExit = true;
+        }
 
 
         [DllImport("kernel32")]
@@ -404,6 +453,8 @@ namespace Meddle
 
         [DllImport("kernel32.dll")]
         static extern uint ResumeThread(IntPtr hThread);
+
+       
     }
 
     [StructLayout(LayoutKind.Sequential)]

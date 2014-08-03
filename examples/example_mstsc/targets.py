@@ -19,7 +19,7 @@ class Target_PrintSymbols(TargetBase):
 		self.functions = []
 		
 		# Regex function name match pattern to add hooks on
-		self.functions_regex = re.compile(".*(encrypt|rc4|decrypt|receive).*",re.IGNORECASE)
+		#self.functions_regex = re.compile(".*(encrypt|rc4|decrypt|receive).*",re.IGNORECASE)
 		self.functions_regex = re.compile(".*",re.IGNORECASE)
 
 		self.hook_exports = False   # Don't hook matching exports
@@ -65,7 +65,7 @@ class Target_RDP_RC4(TargetBase):
 							"fuzz": NOFUZZ },
 
 							{"name": "buffer", "size": self.ProcessBase.types.size_ptr(),
-							"type": self.ProcessBase.types.parse_BUFFER, "size_override": "size",
+							"type": self.ProcessBase.types.parse_BUFFER, "type_args": "size",
 							"fuzz": NOFUZZ }, ]
 
 			
@@ -120,7 +120,6 @@ class Target_Winsock_Send(TargetBase):
 
 			[reg_spec, stack_spec] = self.ProcessBase.types.pascal( parameters )
 			arguments = self.Engine.ParseArguments(stack_spec, reg_spec, context)
-			
 			
 			if self.ProcessBase.verbose:
 				print "Sent size = %i" % arguments.size.ToInt()

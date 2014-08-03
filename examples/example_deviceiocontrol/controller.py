@@ -37,6 +37,9 @@ class Controller:
 		pass
 	
 	def main(self, args):
+		# Set working directory to controller directory
+		os.chdir(os.path.join(os.path.dirname(__file__), ".."))
+		
 		try:
 			printOnly = False
 			for arg in args:
@@ -52,7 +55,7 @@ class Controller:
 			# Perform an initial measurement to gather data for an organized attack
 			logger = capture.capture("capture.log",["timestamp","type","process_name","pid","device_name", "device_h", "data_base64"])
 			mBreakpoint = BreakpointMeasurement()
-			mProcess = ProcessDeviceIo(self, "C:\\Crash\\", mBreakpoint, -1, 0, printOnly, logger )
+			mProcess = ProcessDeviceIo(self, "C:\\Crash\\", mBreakpoint, -1, -1, 0, printOnly, logger )
 			self.CEngine.AttachProcess(mProcess)
 			
 			if printOnly:
