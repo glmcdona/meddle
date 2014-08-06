@@ -86,22 +86,6 @@ class Target_LogUntrusted(TargetBase):
 
 
 	def breakpoint_hit(self, event_name, address, context, th):
-		#print event_name
-		#self.ProcessBase.log_event(event_name + "\r\n")
-
-		#return [[],[]]
-
-		# Disable this hook if it has been called too many times
-		#if event_name not in self.ProcessBase.event_filter:
-		#	self.ProcessBase.event_filter[event_name] = 0
-		#self.ProcessBase.event_filter[event_name] += 1
-
-		#if self.ProcessBase.event_filter[event_name] > 100:
-		#	print "disabled %s" % event_name
-		#	self.Engine.RemoveBreakpoint(self, address)
-
-		#return [[],[]]
-
 		# Parse the return address
 		reg_spec = []
 		stack_spec = [{"name":"returnAddress", "size": self.ProcessBase.types.size_ptr(), "type":None, "fuzz":NOFUZZ}]
@@ -148,7 +132,6 @@ class Target_LogUntrusted(TargetBase):
 				strings = [i for i in strings if len(i) >= 4]
 
 				self.ProcessBase.log_event("%s called from 0x%x: %s\r\n" % (event_name, return_address, ",".join(strings).replace("\r","\\r").replace("\n","\\n")))
-				#print "0x%x %s %s" % (return_address, hex(return_address), event_name)
 
 		return [[],[]]
 
@@ -171,7 +154,6 @@ class Target_LogRegistry(TargetBase):
 		
 		# Regex function name match pattern to add hooks on
 		self.functions_regex = re.compile("a^",re.IGNORECASE)
-		#self.functions_regex = re.compile(".*reg.*",re.IGNORECASE)
 
 		self.hook_exports = True   # Don't hook matching exports
 		self.hook_symbols = False  # Hook matching symbols from pdb
@@ -211,7 +193,11 @@ class Target_LogRegistry(TargetBase):
 			if arguments.KeyHandle.ToInt() in self.ProcessBase.handles:
 				name = self.ProcessBase.handles[arguments.KeyHandle.ToInt()]
 
-			self.ProcessBase.log_event("NtQueryValueKey\r\n\t%s\r\n\t%s\r\n" % (name, arguments.ValueName.Buffer.ReadString()))
+			valueName = arguments.ValueName.Buffer.ReadString()
+			if len(valueName) == 0:
+				valueName = "(default)"
+
+			self.ProcessBase.log_event("NtQueryValueKey\r\n\tKey: %s\r\n\tName: %s\r\n" % (name, valueName))
 
 		elif event_name.lower().find("return buffer") >= 0:
 			# Find the create file arguments corresponding to this return
@@ -259,7 +245,11 @@ class Target_LogRegistry(TargetBase):
 			name = "unknown"
 			if arguments.KeyHandle.ToInt() in self.ProcessBase.handles:
 				name = self.ProcessBase.handles[arguments.KeyHandle.ToInt()]
-			self.ProcessBase.log_event("NtSetValueKey\r\n\t%s\r\n\t%s\r\n\t%s\r\n\t%s\r\n" % (name,arguments.ValueName.Buffer.ReadString(),arguments.Data.BUFFER.ToAscii(),arguments.Data.BUFFER.ToHex()))
+
+			valueName = arguments.ValueName.Buffer.ReadString()
+			if len(valueName) == 0:
+				valueName = "(default)"
+			self.ProcessBase.log_event("NtSetValueKey\r\n\tKey: %s\r\n\tName:%s\r\n\tData:%s\r\n\t%s\r\n" % (name,valueName,arguments.Data.BUFFER.ToAscii(),arguments.Data.BUFFER.ToHex()))
 			
 
 		return [[],[]]

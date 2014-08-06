@@ -193,7 +193,7 @@ namespace Meddle
                     {
                         IntPtr bp_addr = (IntPtr)_breakpointInfo[(uint)em.ThreadId];
                         _breakpointInfo.Remove((uint)em.ThreadId);
-
+                           
                         if (_breakpoints.Contains(bp_addr))
                         {
                             // Restore the breakpoint

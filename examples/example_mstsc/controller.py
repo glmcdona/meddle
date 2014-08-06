@@ -51,7 +51,8 @@ class Controller:
 					server = args[i+1]
 
 			# Select a random seed
-			seed = int(random.random()*1000000)
+			#seed = int(random.random()*1000000)
+			seed = 2
 			self.generator = random.Random()
 			self.generator.seed(seed)
 			print "Controller is using seed value of %i. Set this value manually to reproduce this attack." % seed
@@ -97,8 +98,12 @@ class Controller:
 			
 			# Run the auto-it script that will press "Cancel" on the watson crash dump. Unfortunately this has to be clicked
 			# before the process is terminated in order for a proper crashdump to be created it seems.
-			subprocess.Popen(['autoit3.exe', os.path.join(os.path.dirname(__file__), "..", "autoit", "watson_cancel.au3"), ">nul"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			try:
+				subprocess.Popen(['autoit3.exe', os.path.join(os.path.dirname(__file__), "..", "autoit", "watson_cancel.au3"), ">nul"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			except:
+				print "Warning: autoit3.exe may not have been found on path. Please install it and add it to path to increase the attack surface."
 
+			
 			f = open("log.txt","wb")
 			f.write(str(datetime.datetime.now()) + "\r\n")
 			f.write("controller using seed %i\r\n" % seed)
@@ -119,7 +124,7 @@ class Controller:
 			fault_pause = 180
 			self.last_fault = time.time()-120000
 			max_runtime = 5
-			num_processes = 20
+			num_processes = 25
 			unique_identifier = 1
 
 			event_positions = {}

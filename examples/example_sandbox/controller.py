@@ -57,9 +57,8 @@ class Controller:
 			seed = int(random.random()*1000000)
 			self.generator = random.Random()
 			self.generator.seed(seed)
-			print "Controller is using seed value of %i. Set this value manually to reproduce this attack." % seed
 			
-			# Perform an initial measurement to gather data for an organized attack
+			# Create the sandbox sample
 			self.logger = capture.sandbox_logfile(".","events")
 			mBreakpoint = BreakpointEmpty()
 			mProcess = ProcessSandbox(self, "C:\\Crash\\", mBreakpoint, -1, 0, self.printOnly, self.logger, self.instrumentFile, self.instrumentFile, None, False, None )
@@ -73,6 +72,7 @@ class Controller:
     		raise	
 
 	def process_fork(self, new_pid, new_tid, new_ph, suspend_switched):
+		# Fork the sandbox sample
 		mBreakpoint = BreakpointEmpty()
 		new_th = windll.kernel32.OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_SUSPEND_RESUME,
                              0,

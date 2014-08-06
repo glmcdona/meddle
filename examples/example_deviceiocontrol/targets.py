@@ -1,34 +1,4 @@
 from target_base import *
-		
-
-class Target_PrintSymbols(TargetBase):	
-	
-	# Override __init__()
-	def __init__(self, Engine, ProcessBase):
-		self.Engine = Engine
-		self.ProcessBase = ProcessBase
-		
-		# List of libraries to potentially add hooks on.  Must be lowercase.
-		self.libraries = ["mstscax.dll"]
-		
-		# Regex library name match pattern to add hooks on
-		#self.libraries_regex = re.compile("^((?!kernel|user|ntdll).)*$",re.IGNORECASE) # match nothing
-		self.libraries_regex = re.compile("a^",re.IGNORECASE) # match nothing
-		
-		# List of function names to add hooks on.  Must be lowercase.
-		self.functions = []
-		
-		# Regex function name match pattern to add hooks on
-		self.functions_regex = re.compile(".*(encrypt|rc4|decrypt|receive).*",re.IGNORECASE)
-		self.functions_regex = re.compile(".*",re.IGNORECASE)
-
-		self.hook_exports = False   # Don't hook matching exports
-		self.hook_symbols = True  # Hook matching symbols from pdb
-	
-
-	def breakpoint_hit(self, event_name, address, context, th):
-		print event_name
-		return [[],[]]
 
 
 class Target_DeviceIoControl(TargetBase):
@@ -90,7 +60,7 @@ class Target_DeviceIoControl(TargetBase):
 			[reg_spec, stack_spec] = self.ProcessBase.types.winapi( parameters )
 			arguments = self.Engine.ParseArguments(stack_spec, reg_spec, context)	
 			
-			name = "Driver unknown"
+			name = "unknown"
 			if arguments.FileHandle.ToInt() in self.ProcessBase.handles:
 				name = self.ProcessBase.handles[arguments.FileHandle.ToInt()]
 			
@@ -100,8 +70,7 @@ class Target_DeviceIoControl(TargetBase):
 
 			if arguments.OutputBufferLength.ToInt() > 0:
 				self.Engine.AddBreakpoint(self, arguments.returnAddress.ToPtr(), "return buffer")
-
-			self.buffers[str(th)] = arguments;
+				self.buffers[str(th)] = arguments;
 
 			# Log the event
 			fields = {}
@@ -123,7 +92,7 @@ class Target_DeviceIoControl(TargetBase):
 				arguments = self.buffers[str(th)]
 				del self.buffers[str(th)]
 
-				name = "Driver unknown"
+				name = "unknown"
 				if arguments.FileHandle.ToInt() in self.ProcessBase.handles:
 					name = self.ProcessBase.handles[arguments.FileHandle.ToInt()]
 

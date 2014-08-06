@@ -117,11 +117,13 @@ class Controller:
 			terminate_counts = []
 			fault_pause = 180
 			self.last_fault = time.time()-120000
-			max_runtime = 5
+			max_runtime = 10
 			num_processes = 20
 			unique_identifier = 1
 
 			event_positions = {}
+
+			logger = capture.capture_empty()
 			
 			while True:
 				for j in range(len(report_events_by_target)):
@@ -151,7 +153,7 @@ class Controller:
 					# Create a new process
 					breakpointSeed = self.generator.randint(1,10000000)
 					newBreakpoint = BreakpointAttackSequentially(5, event_positions[event_name], event_name, breakpointSeed ) # 5% of data will be attacked
-					newProcess = ProcessDeviceIo(self, "C:\\Crash\\", newBreakpoint, -1, unique_identifier, False, logger )
+					newProcess = ProcessDeviceIo(self, "C:\\Crash\\", newBreakpoint, -1, -1, unique_identifier, False, logger )
 					self.CEngine.AttachProcess(newProcess)
 					unique_identifier+=1
 					

@@ -17,6 +17,13 @@ class capture:
 		finally:
 			self.lock.release()
 
+class capture_empty(capture):
+	def __init__(self):
+		pass
+		
+	def log_event(self, fields):
+		pass
+
 class sandbox_logfile:
 	def __init__(self, path, prefix):
 		self.path = path

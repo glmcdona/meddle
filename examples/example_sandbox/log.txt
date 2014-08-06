@@ -1,2 +1,0 @@
-process loaded notepad.exe
-process loaded SearchFilterHost.exe
